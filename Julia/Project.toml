@@ -1,0 +1,16 @@
+name = "ComputationalMethods"
+uuid = "5f842811-84e6-42ef-8ee7-3cea55281c4c"
+authors = ["David Childers <davidbchilders@gmail.com> and contributors"]
+version = "1.0.0-DEV"
+
+[deps]
+IJulia = "7073ff75-c697-5162-941a-fcdaad2a7d2a"
+
+[compat]
+julia = "1.8"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
