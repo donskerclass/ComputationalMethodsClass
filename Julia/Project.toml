@@ -4,7 +4,9 @@ authors = ["David Childers <davidbchilders@gmail.com> and contributors"]
 version = "1.0.0-DEV"
 
 [deps]
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
 IJulia = "7073ff75-c697-5162-941a-fcdaad2a7d2a"
+IterativeSolvers = "42fd0dbc-a981-5370-80f2-aaf504508153"
 
 [compat]
 julia = "1.8"
