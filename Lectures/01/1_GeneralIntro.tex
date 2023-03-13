@@ -1,0 +1,1036 @@
+\documentclass[bigger]{beamer}
+
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{mathpazo}
+
+ \let\TEXTsymbol\ensuremath 
+ 
+\usetheme{Madrid}
+\usecolortheme{beaver}
+\usefonttheme{professionalfonts}
+
+\begin{document}
+
+\title[47-805: Intro]{47-805: Computational Methods\\
+Introduction \& General issues}
+\subtitle{Judd Chapters 1-2}
+\author[David Childers]{David Childers (thanks to Y. Kryukov, K. Judd, and U. Doraszelski)}
+\institute[CMU]{CMU, Tepper School of Business}
+\date[Mar-13]{March 13, 2023}
+\maketitle
+
+\begin{frame}%
+
+\frametitle{Plan for today}
+
+\begin{enumerate}
+\item Computational methods: why and how to use them
+
+\item General points on:
+
+\begin{enumerate}
+\item Number representation
+
+\item Problem solving
+
+\item Coding\bigskip
+\end{enumerate}
+\end{enumerate}
+
+Next time: Solving systems of linear equations (Chapter 3)
+
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{What are computational methods?}
+
+\begin{itemize}
+\item Economics is full of problems without closed-form solutions:
+
+\begin{itemize}
+\item Macro: dynamic problems
+
+\item Econometrics: estimators solve optimization or integration problems
+
+\item General equilibrium is a system of nonlinear eq-s
+
+\item Finance: stochastic calculus \& diff. eq's
+
+\item Applied Micro: Games, especially dynamic ones
+\end{itemize}
+
+\item Pencil \& paper methods limit us to special cases
+
+\item Realistic applications lead to analytically intractable problems
+
+\item Numerical methods let us substantially relax constraint on tractability
+\end{itemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{Computing power \& its limits}
+
+\begin{itemize}
+\item Moore's law: computing power doubles every 18 months
+
+\begin{itemize}
+\item Faster CPUs, more CPUs in the same box
+
+\item Server farms / Supercomputers: 100's of CPUs/GPUs
+\end{itemize}
+
+\item But: CPU is a complement to human brain, not a substitute
+
+\begin{itemize}
+\item Brute force can take too long, or fail to solve the problem.\newline
+$\Rightarrow $ choice of model form, solution method, starting value, etc.
+
+\item Inappropriate methods can produce unreasonable results\newline
+$\Rightarrow $ economic interpretation \& verification of results.
+\end{itemize}
+
+\item Numerical methods is a field dedicated to solving problems
+
+\begin{itemize}
+\item Economics is about finding interesting problem to solve, \newline
+and interpreting the solution; \textbf{not} the solution methods
+
+\item But: need to know strength and weaknesses of each method
+\end{itemize}
+\end{itemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{What can numerical methods do?}
+
+\begin{itemize}
+\item Solve intractable problems:
+
+\begin{itemize}
+\item Realistic models in both macro and micro
+
+\item Specialized estimation problems (GMM, MLE, Bayes)
+
+\item Policy experiments on estimated model
+\end{itemize}
+
+\item Generate hypothesis or counterexamples
+
+\begin{itemize}
+\item Can say: X might happen, maybe even likely/unlikely
+
+\item Cannot say: X will always/never happen
+\end{itemize}
+
+\item Check derivations, quantify \& visualize effects
+
+\item Still, can only solve one parameterization at a time:
+
+\begin{itemize}
+\item Large number of examples instead of general results
+\end{itemize}
+\end{itemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{Criticism of numerical methods, \& response}
+
+\begin{itemize}
+\item Limited to a finite number of parameterizations
+
+\begin{itemize}
+\item Theory is usually limited to a finite set of functional forms
+
+\item We can approximate smooth functions
+
+\item Can combine w/ symbolic/logical methods for non-local results  
+\end{itemize}
+
+\item Introduces errors
+
+\begin{itemize}
+\item We can bound or measure them: compute and verify
+\end{itemize}
+
+\item Is a "Black box": what are economic forces behind the result?
+
+\begin{itemize}
+\item Do comparative statics, e.g. try turning effects off
+
+\item Take analytical derivation as far as you can
+\end{itemize}
+
+\item Computational methods extend analytical ones, not replace them
+\end{itemize}
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{Computational research stages}
+
+\begin{enumerate}
+\item Pick an economic issue, represent as mathematical problem
+
+\item Pick a numerical solution method
+
+\item Code it up, solve, experiment with it
+
+\item Interpret the results:
+
+\begin{enumerate}
+\item Note behavior consistent with existing theory
+
+\item Find economic reasons behind unexpected behavior,\newline
+make sure it is not caused by numeric issues
+
+\item Solve trivial cases (e.g. discount factor = 0), \newline
+where you know how the solution should look like
+
+\item Robustness checks: different numeric method(s) \& settings, \newline
+different functional forms, different model
+\end{enumerate}
+
+\item Use data to quantify model features, test structure 
+
+\item 4.1-2 or 5 core of theory, empirical paper, respectively, \newline
+4.4 = brief section at the end + details in online appendix
+\end{enumerate}
+
+\end{frame}
+
+\begin{frame}%
+
+\frametitle{Course goals}
+
+\begin{itemize}
+\item Solve dynamic problems (e.g. discrete time):%
+\begin{eqnarray*}
+&&\max \sum \beta ^{t}u\left( f\left( k_{t}\right) -k_{t+1}\right) \\
+&\Rightarrow &V\left( k\right) =\max_{k^{\prime }}u\left( f\left( k\right)
+-k^{\prime }\right) +\beta V\left( k^{\prime }\right)
+\end{eqnarray*}
+
+\item Maximization $\Rightarrow $ nonlinear equations $\Rightarrow $ linear
+equations
+
+\begin{itemize}
+\item Also: constraints, integration ($\beta \mathbf{E}\left[ V\left(
+k^{\prime }\right) |k,c\right] $), etc.
+\end{itemize}
+
+\item Unknown function $V\left( \cdot \right) $: polynomials or splines
+
+\item Solving the dynamic problem:
+
+\begin{itemize}
+\item Dynamic programming (iterate on Bellman)
+
+\item Projection: find $V\left( \cdot \right) $ and policy functions directly
+\end{itemize}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+
+\frametitle{Model taxonomy}
+
+\begin{itemize}
+\item Time:
+
+\begin{itemize}
+\item Discrete: $V\left( k\right) =\max_{c}u\left( k,c\right) +\beta V\left(
+f(k,c)\right) $
+
+\item Continuous: $\ \rho V\left( k\right) =\max_{c}u(k,c)+V^{\prime }\left(
+k\right) g(k,c)$
+\end{itemize}
+
+\item State:
+
+\begin{itemize}
+\item Discrete ($k\in \left\{ k_{i}\right\} $)
+
+\item Continuous ($k\geq 0$)
+\end{itemize}
+
+\item State transitions:
+
+\begin{itemize}
+\item Deterministic: ... $+\beta V\left( f(k,c)\right) $
+
+\item Stochastic: ... $+\beta \mathbf{E}_{k^{\prime }}\left[ V\left(
+k^{\prime }\right) |k,c\right] $
+\end{itemize}
+
+\item We can solve any combination of the above
+
+\begin{itemize}
+\item Pick features that match your economic story
+
+\item "Simplest" case (discrete time \& state, deterministic transitions)
+often leads to unreasonable results, \newline
+and can be hard to compute.
+\end{itemize}
+\end{itemize}
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{Course structure}
+
+\begin{enumerate}
+\item Solving for an unknown number (or vector):
+
+\begin{itemize}
+\item Solving linear and nonlinear equations
+
+\item Optimization
+
+\item Integration and simulation
+\end{itemize}
+
+\item Solving for an unknown function:
+
+\begin{itemize}
+\item Polynomial, spline, \& other approximations
+
+\item Differential equations
+
+\item Projection methods
+\end{itemize}
+
+\item Applications to dynamic problems in Econ:
+
+\begin{itemize}
+\item Dynamic programming
+
+\item Optimal control, Euler equations
+
+\item Other advanced topics (suggestions?)
+\end{itemize}
+\end{enumerate}
+
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{Tradeoffs}
+
+\begin{itemize}
+\item Time vs. precision
+
+\item Time vs. robustness
+
+\item Machine time vs. programming time\bigskip
+\end{itemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+%EndExpansion
+\frametitle{Course logistics}
+
+\begin{itemize}
+\item Canvas: lectures, homeworks, announcements
+
+\item \textbf{Homeworks} - your best chance to review the material, learn to
+code \& receive feedback
+
+\begin{itemize}
+\item Submit meaningful write-up \& discussion; upload code as ZIP
+
+\item Teams up to 3 people; HW 1 should be done alone.
+
+\item Can't use outside help, e.g.: other students, last year solutions, 
+\newline
+code from other sources
+
+\item Can use Internet for reference purposes (with citation)
+
+\item Lowest scoring homework will be dropped (given honest effort)
+\end{itemize}
+
+\item No midterm
+
+\item Final exam: 48 hour take-home, date TBD
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}%
+
+\frametitle{Number representation \& machine zero}
+
+\begin{itemize}
+\item At lowest (binary) level, computer can only deal with integers
+
+\item Real numbers are stored as $\pm m\ast 2^{\pm n}$
+
+\begin{itemize}
+\item $m$ = mantissa, $n$ = exponent
+\end{itemize}
+
+\item \textbf{Double precision} storage format: $m$ and $n$ share the same
+64 bits $\implies $ both are bounded
+
+\item Bound on exponent $n$ determines lowest and largest values
+
+\item \textbf{Machine zero}: smallest positive number that machine can
+represent
+
+\begin{itemize}
+\item Matlab: \texttt{realmin}/Julia \texttt{nextfloat(-Inf)}/Numpy \texttt{np.finfo(np.float64).min} $\approx $ -2e-308
+
+\item Largest possible number: \texttt{realmax}/\texttt{prevfloat(Inf)}/\texttt{np.finfo(np.float64).max} $\approx $ \texttt{2e+308 }$%
+\approx e^{710}$
+\end{itemize}
+\end{itemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{Machine epsilon}
+
+\begin{itemize}
+\item Real numbers are stored as $\pm m\ast 2^{\pm n}$
+\end{itemize}
+
+Bound on mantissa $m$ limits the number of digits:
+
+\begin{itemize}
+\item \textbf{Machine epsilon}: smallest difference from 1.0\newline
+that the machine can represent
+
+\item Given Matlab/Julia/Python 64-bit precision: \texttt{eps()} $\approx $ 2e-16
+
+\begin{itemize}
+\item If you have $A\approx 1$, and \texttt{A-B }$\approx 1e$-$16$, \newline
+then you can assume that $A=B$.
+
+\item Example: type "\texttt{0.6-0.2-0.2-0.2}" into Matlab/Julia/Python
+\end{itemize}
+
+\item Machine zero \TEXTsymbol{<} machine epsilon:
+
+\begin{itemize}
+\item $m$ and $n$ share the same 64 bits
+
+\item many digits in $m$ leave less room for $n$
+
+\item change units to keep your values in (0.01, 100)
+\end{itemize}
+\end{itemize}
+
+\end{frame}%
+
+\begin{frame}%
+%EndExpansion
+\frametitle{Error propagation}
+
+\begin{itemize}
+\item Mathematical operations propagate rounding error
+
+\item Solving: $x^{2}-26x+1=0\implies x=13-\sqrt{168}=0.0385186$
+
+\item Machine that stores 5 decimal digits would compute: $%
+13.000-12.961=0.039$
+
+\item Answer has precision reduced from 5 meaningful digits to 2
+
+\begin{itemize}
+\item Small difference between large numbers will be imprecise
+\end{itemize}
+
+\item If $A$ and $B$\texttt{\ }are on the scale of $10^{6}$, \newline
+you cannot expect \texttt{A-B} to go below \texttt{1e-10}
+\end{itemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+%EndExpansion
+\frametitle{Computation speed}
+
+\begin{itemize}
+\item Basic arithmetic (+, --, *, /) is fast
+
+\item Everything else is approximated through those
+
+\item Functions with no closed form take a lot longer
+
+\item Exponent takes several times longer than multiplication:%
+\begin{equation*}
+e^{x}=\sum\nolimits_{n=0}^{\infty }\frac{x^{n}}{n!}\approx
+\sum\nolimits_{n=0}^{N}\frac{x^{n}}{n!}
+\end{equation*}
+
+\item $\Rightarrow $ pre-compute \& store expressions that will not change
+during iterations
+
+\item $\Rightarrow $ transform the formula, e.g. Horner's method:
+
+\begin{itemize}
+\item $a_{0}+a_{1}x+a_{2}x^{2}+a_{3}x^{3}$ , vs.
+
+\item $a_{0}+x\left( a_{1}+x\left( a_{2}+a_{3}x\right) \right) $
+\end{itemize}
+\end{itemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{Solution methods}
+
+\textbf{Direct methods} (e.g. $x=\frac{-b\pm \sqrt{b^{2}-4ac}}{2a}$):
+
+\begin{itemize}
+\item Result in an "exact" solution
+
+\item Takes finite (but potentially long) time
+\end{itemize}
+
+\textbf{Iterative methods}:
+
+\begin{itemize}
+\item Each iteration $k$ generates a new guess at the solution:\newline
+$x_{k+1}=g\left( x_{k},x_{k-1},...\right) $.
+
+\item E.g. $x_{k}=\left[ e^{a}\right] _{k}=\sum\nolimits_{n=0}^{k}\frac{a^{n}%
+}{n!}=x_{k-1}+\frac{a^{k}}{k!}$
+
+\item Each guess is (hopefully) closer to the true solution
+
+\begin{itemize}
+\item I.e. sequence (hopefully) converges, to the solution
+\end{itemize}
+
+\item Stopping criterion \& max. number of iterations trade off computation
+time vs. precision.
+\end{itemize}
+
+
+\end{frame}%
+
+\begin{frame}
+\frametitle{Order notation}
+
+\begin{itemize}
+
+\item Let $x_k$ be the $k^{th}$ element of a sequence and $f(k)$ a nonnegative sequence 
+
+\item $x_{k}$ is $O(f(k))$ (say "$x_k$ is big O $f(k)$") if
+
+\begin{equation*}
+\underset{k\to\infty}{\lim\sup} \left|\frac{x_{k}}{f(k)}\right|<\infty
+\end{equation*}
+
+\item $x_{k}$ is $o(f(k))$ (say "$x_k$ is little o $f(k)$") if
+
+\begin{equation*}
+\underset{k\to\infty}{\lim}\left|\frac{x_{k}}{f(k)}\right|= 0 
+\end{equation*}
+
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}%
+
+\frametitle{Computational Complexity: Some minimal theory}
+
+\begin{itemize}
+
+\item Goal of computation is to take some (finite) input $x$ (a \emph{problem}) and produce the correct output $y$ (the "result") by means of a function $f(.)$ (a \emph{program}) that applies a series of steps which can be performed by a machine
+\item Standard to study case where $y\in\{True,False\}$
+\item Computational theory asks several questions about $f()$
+
+\begin{enumerate}
+\item Computability: $\exists f()$ which produces $y$ in finite time?
+  \begin{itemize}
+  \item Fact: $\exists$ problems for which answer is \emph{no}:
+  \item These problems are called "noncomputable"
+  \end{itemize}
+\item Supposing answer to (1) is *yes*, how many resources does it take to compute?
+  \begin{itemize}
+  \item Time: $\#$ of operations
+  \item Space: $\#$ of bits of memory
+  \item Other resources as needed
+  \end{itemize}
+\end{enumerate}
+
+\end{itemize}
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{Computational Resources}
+
+\begin{itemize}
+
+\item Answers to resource cost allowed can depend on size $n$ of input
+    \begin{itemize}
+    \item If $\#$ ops (bits) $O(n^k)$, $k<\infty$ problem is polynomial time (space)
+    \item If $\#$ ops (bits) $O(2^{n^k})$ problem is exponential time (space)
+    \end{itemize}
+\item Biggest unsolved problem in compsci is, roughly, what kinds of problems are in each class
+\item Numerics looks at problems where $y$ is a number, which allows consideration of other resources
+    \begin{itemize}
+    \item Precision: For $\epsilon>0$, let $f(x)$ produce $\tilde{y}$ such that $\left\Vert y-\tilde{y}\right\Vert<\epsilon$
+    \item Probability: For $\delta>0$ allow $\tilde{y}$ random such that $Pr(\left\Vert y-\tilde{y}\right\Vert<\epsilon)>1-\delta$
+    \end{itemize}
+
+
+\end{itemize}
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{Approach to resources in this class}
+
+\begin{itemize}
+
+
+\item Goal: find programs for problems $x$ in some class which are fast, small, precise, reliable.
+    \begin{itemize}
+    \item i.e. $ops<O(q(\epsilon,\delta,n))$ with optimal dependency of $q()$ on $\epsilon,\delta,n$
+    \item Equivalently, $\epsilon<O(r(ops,\delta,n))$ for optimal $r()$
+    \end{itemize}
+
+\item We will not systematically probe optimal production possibilities frontier for any class of problem
+\item Instead, we will describe reasonable assortment of useful methods, and say a little bit about properties and tradeoffs
+
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}%
+
+\frametitle{Rates of convergence (geometric convention)}
+
+\begin{itemize}
+\item $x_{k}$ converges to $x^{\ast }$ at rate $q$ if:%
+\begin{equation*}
+\lim_{k\rightarrow \infty }\frac{\left\Vert x_{k+1}-x^{\ast }\right\Vert }{%
+\left\Vert x_{k}-x^{\ast }\right\Vert ^{q}}<\infty
+\end{equation*}
+
+\item $x_{k}$ converges to $x^{\ast }$ \textbf{linearly} at rate $\beta $ if:%
+\begin{equation*}
+\lim_{k\rightarrow \infty }\frac{\left\Vert x_{k+1}-x^{\ast }\right\Vert }{%
+\left\Vert x_{k}-x^{\ast }\right\Vert }=\beta <1
+\end{equation*}
+
+\item Convergence at rate $q$ $\implies$ $\left\Vert x_{k}-x^{\ast}\right\Vert=O(\exp(-q^{k}))$
+
+\item Linear convergence at rate $\beta$ $\implies$ $\left\Vert x_{k}-x^{\ast}\right\Vert=O(\beta^{k})$
+
+\item Informally: Linear convergence improves precision by 1 digit each fixed $\#$ of iterations ($\frac{-1}{\log_{10}(\beta)}$)
+
+\item Iterative algorithms usually have geometric convergence
+
+\item Will use this convention in most of class
+
+\end{itemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+%EndExpansion
+\frametitle{Stopping rules}
+
+\begin{itemize}
+\item Want to stop when $x_{k}$ is close to $x^{\ast }$.
+
+\item We do not know $x^{\ast }$ $\Rightarrow $ stop when $x_{k}$ is close
+to $x_{k+1}$, \newline
+i.e. when $f\left( \left\Vert x_{k+1}-x_{k}\right\Vert \right) <\delta $
+
+\item Using absolute difference $\left\Vert x_{k+1}-x_{k}\right\Vert $ is a
+bad idea \newline
+if $x$'s are large, due to limited precision.
+
+\item Relative difference $\left\Vert x_{k+1}-x_{k}\right\Vert /\left\Vert
+x_{k}\right\Vert $ -- better but \newline
+might "blow up" if $x_{k}$ is close to zero
+
+\item Hybrid rule: $\left\Vert x_{k+1}-x_{k}\right\Vert /\left[ 1+\left\Vert
+x_{k}\right\Vert \right] $
+
+\item Potential problem: we might stop far from $x^{\ast }$
+
+\begin{itemize}
+\item E.g. $x_{k}=\sum\nolimits_{n=1}^{k}\frac{1}{n}\rightarrow \infty $,
+but $\left\vert x_{k}-x_{k+1}\right\vert =\frac{1}{k+1}\rightarrow 0$
+\end{itemize}
+\end{itemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{Testing the solution: compute and verify}
+
+\begin{itemize}
+\item Solving $f\left( x\right) =0$: true solution is $x^{\ast }$ is
+unknown, \newline
+computed numeric solution is $\hat{x}$
+
+\item Forward error analysis (compare $x^{\ast }$ to $\hat{x}$) is infeasible
+
+\item Backward error analysis: compare $f\left( \cdot \right) $ to similar
+function $\hat{f}\left( \cdot \right) $ that has $\hat{f}\left( \hat{x}%
+\right) =0$
+
+\begin{itemize}
+\item $\hat{f}\left( \cdot \right) $ can be tricky to make meaningful
+\end{itemize}
+
+\item Compute and verify: compare $f\left( \hat{x}\right) $ to $0$, \newline
+normalized for scale if possible
+
+\begin{itemize}
+\item GE: $E\left( p^{\ast }\right) \equiv D\left( p^{\ast }\right) -S\left(
+p^{\ast }\right) =0$ (absolute error)
+
+\item Relative error: compare $E\left( \hat{p}\right) /D\left( \hat{p}%
+\right) $ to $0$
+\end{itemize}
+\end{itemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{Matlab hints}
+
+\begin{itemize}
+\item Every variable is a matrix (or $N$-dimensional array),\newline
+of double-precision reals.
+
+\item Capitalization matters
+
+\item Interpreter language: check variables after error
+
+\begin{itemize}
+\item \emph{F12} = break point; \texttt{error('Message')} stops code
+\end{itemize}
+
+\item Use help:
+
+\begin{itemize}
+\item \emph{Menu/Help/Product help}, then maybe \emph{Index}
+
+\item Select command and press F1
+
+\item Type: \texttt{help \TEXTsymbol{<}command\TEXTsymbol{>}}
+\end{itemize}
+
+\item Matrix operations instead of \texttt{for }loops:
+
+\begin{itemize}
+\item Elementwise operations: \texttt{.+ \ .- .* ./ .\symbol{94}}
+
+\item \texttt{Log(), exp()} and most functions work on matrices
+
+\item indexing: \texttt{lag\_X=[NaN X(1:end-1)];}
+\end{itemize}
+\end{itemize}
+
+
+\end{frame}
+
+\begin{frame}
+
+\frametitle{Readable code}
+
+\begin{itemize}
+\item Header comment $\%\%$ explaining what this code does
+
+\item Set all parameters as variables at the beginning of the code
+
+\item Use descriptive comments $\%$ every few lines
+
+\begin{itemize}
+\item \emph{Ctrl-R} (\emph{command /} on Mac) and \emph{Ctrl-T} = (un)comment lines
+\end{itemize}
+
+\item Use offsets with control structures (\texttt{for, while, if})
+
+\begin{itemize}
+\item \emph{Ctrl-[} and \emph{Ctrl-]} = offset selected lines
+\end{itemize}
+
+\item Cell mode (=paragraphs): "\%\%" starts a new cell
+
+\begin{itemize}
+\item Ctrl-Enter runs the current cell
+\end{itemize}
+\end{itemize}
+
+\end{frame}%
+
+\begin{frame}
+\frametitle{Writing the code}
+
+\begin{itemize}
+\item One does not simply type 500 lines of code
+
+\begin{itemize}
+\item Mistakes will happen
+\end{itemize}
+
+\item Try to test every "block" of code
+
+\begin{itemize}
+\item F9 runs selected code
+
+\item Use Matlab's cells (\%\% Headers, Ctrl-Enter to run)
+
+\item Give it trivial inputs, so you can know the correct output
+
+\item Verify output using manual calculation or alternative formula
+\end{itemize}
+
+\item Provide meaningful output on screen
+
+\begin{itemize}
+\item E.g. iteration report: $x$, difference from stopping criterion.
+
+\item Look up \texttt{fprintf} for formatted output
+\end{itemize}
+\end{itemize}
+
+%TCIMACRO{\TeXButton{EndFrame}{\end{frame}}}%
+%BeginExpansion
+\end{frame}
+
+\begin{frame}%
+
+\frametitle{Julia hints}
+
+\begin{itemize}
+\item Every variable has a \emph{type} (Float64, Int64, Array, etc) and every function must be compatible with the type of the input.
+
+\item Programming with types improves speed and readability by specializing method to input structure.
+
+\item Capitalization matters
+
+\item Use help:
+
+\begin{itemize}
+
+\item \url{https://docs.julialang.org/} and \url{https://julia.quantecon.org} invaluable sources
+
+\item Type: \texttt{? \TEXTsymbol{<}command\TEXTsymbol{>}}
+\end{itemize}
+
+\item \texttt{for }loops: not slow like Matlab, but \emph{broadcasting} still useful
+
+\begin{itemize}
+\item Elementwise operations: \texttt{.+ \ .- .* ./ .\symbol{94}}
+
+\item \texttt{log.(), exp.()} etc elementwise using $.$ symbol, to whole array without.
+\end{itemize}
+\end{itemize}
+
+
+\end{frame}
+
+\begin{frame}
+
+\frametitle{Readable code}
+
+\begin{itemize}
+
+\item Code in Jupyter notebooks mixes text cells and code cells
+\begin{itemize}
+\item Provide useful header plus context and explanations
+\end{itemize}
+
+\item Use notebooks for exploratory model building, collections .jl scripts (in terminal or IDE like VSCode) for large projects 
+
+\item Code in scripts should have header and comments 
+
+\item Use descriptive comments $\#$ every few lines
+
+\begin{itemize}
+\item \emph{Ctrl-/} (\emph{command /} on Mac) in VSCode IDE
+\end{itemize}
+
+\item Set all parameters as variables at the beginning of the code
+
+\item Use offsets with control structures (\texttt{for, while, if})
+
+\end{itemize}
+
+\end{frame}%
+
+
+
+
+
+\begin{frame}
+\frametitle{Writing the code}
+
+\begin{itemize}
+\item One does not simply type 500 lines of code
+
+\begin{itemize}
+\item Mistakes will happen
+\end{itemize}
+
+\item Try to test every "block" of code
+
+\begin{itemize}
+\item Run code in REPL (interactively) to see output
+
+\item Encapsulate discrete behaviors in functions: prevents repetition, improves speed, allows repurposing code when model changes
+
+\item \texttt{using Test} package allows setting formal tests
+
+\item Verify output using manual calculation or alternative formula
+\end{itemize}
+
+\item Provide meaningful output on screen
+
+\begin{itemize}
+\item E.g. iteration report: $x$, difference from stopping criterion.
+
+\item Look up \texttt{println} for formatted output
+\end{itemize}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}%
+
+\frametitle{Python hints}
+
+
+\begin{itemize}
+
+\item Spaces and capitalization matter, indices start at 0 instead of 1
+
+\item Use help:
+
+\begin{itemize}
+
+\item \url{https://python.quantecon.org} invaluable source
+
+\item Colab and VSCode have docs as popup
+\end{itemize}
+
+\item Python is \emph{interpreted} and \emph{dynamically typed}: 
+\begin{itemize}
+\item Commands make a guess at type of data at runtime rather than requiring explicit declaration
+\item Good for convenience, interactivity, bad for reliability and speed
+\item \emph{Libraries} like \texttt{numpy}, \texttt{scipy} have fast precompiled functions
+\item \texttt{numba} allows \texttt{@jit} (just-in-time) compilation to optimize own functions
+\end{itemize}
+
+
+\end{itemize}
+
+
+\end{frame}
+
+\begin{frame}
+
+\frametitle{Readable code}
+
+\begin{itemize}
+
+\item Code in Jupyter notebooks mixes text cells and code cells
+\begin{itemize}
+\item Provide useful header plus context and explanations
+\end{itemize}
+
+\item Use notebooks for exploratory model building, collections of scripts (in terminal or IDE like VSCode) for large projects 
+
+\item Code in scripts should have header and comments 
+
+\item Use descriptive comments $\#$ every few lines
+
+\begin{itemize}
+\item \emph{Ctrl-/} (\emph{command /} on Mac) in VSCode IDE
+\end{itemize}
+
+\item Set all parameters as variables at the beginning of the code
+
+\item Use offsets with control structures (\texttt{for, while, if})
+
+\end{itemize}
+
+\end{frame}%
+
+
+
+
+
+\begin{frame}
+\frametitle{Writing the code}
+
+\begin{itemize}
+\item One does not simply type 500 lines of code
+
+\begin{itemize}
+\item Mistakes will happen
+\end{itemize}
+
+\item Try to test every "block" of code
+
+\begin{itemize}
+\item Run code in interactively to see output
+
+\item Encapsulate discrete behaviors in functions and classes: prevents repetition, improves speed, allows repurposing code when model changes
+
+\item Verify output using manual calculation or alternative formula
+\end{itemize}
+
+\item Provide meaningful output on screen
+
+\begin{itemize}
+\item E.g. iteration report: $x$, difference from stopping criterion.
+\item \texttt{print(f"Text $\{$variable$\}$")} for formatted output
+
+\end{itemize}
+\end{itemize}
+
+\end{frame}
+
+
+
+
+\end{document}
+
