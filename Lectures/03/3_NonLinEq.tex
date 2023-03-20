@@ -1,0 +1,850 @@
+%2multibyte Version: 5.50.0.2953 CodePage: 1252
+
+\documentclass[bigger]{beamer}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{mathpazo}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{multimedia}
+
+%\setcounter{MaxMatrixCols}{10}
+%TCIDATA{OutputFilter=LATEX.DLL}
+%TCIDATA{Version=5.50.0.2953}
+%TCIDATA{Codepage=1252}
+%TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
+%TCIDATA{BibliographyScheme=Manual}
+%TCIDATA{Created=Monday, October 27, 2008 15:56:24}
+%TCIDATA{LastRevised=Wednesday, March 22, 2017 13:12:58}
+%TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
+%TCIDATA{<META NAME="DocumentShell" CONTENT="Other Documents\SW\Slides - Beamer">}
+%TCIDATA{CSTFile=beamer.cst}
+
+%\newenvironment{stepenumerate}{\begin{enumerate}[<+->]}{\end{enumerate}}
+%\newenvironment{stepitemize}{\begin{itemize}[<+->]}{\end{itemize} }
+%\newenvironment{stepenumeratewithalert}{\begin{enumerate}[<+-| alert@+>]}{\end{enumerate}}
+%\newenvironment{stepitemizewithalert}{\begin{itemize}[<+-| alert@+>]}{\end{itemize} }
+\usetheme{Madrid}
+\usecolortheme{beaver}
+\usefonttheme{professionalfonts}
+\input{tcilatex}
+\setbeamertemplate{navigation symbols}{}
+\begin{document}
+
+\title[47-809: Non-linear equations]{Non-linear equations}
+\subtitle{Judd Chapter 5}
+\author[David Childers]{David Childers (thanks to Y. Kryukov, K. Judd, and U. Doraszelski)}
+\institute[CMU]{CMU, Tepper School of Business}
+\date[Mar-20]{March 20, 2023}
+\maketitle
+
+\section{Non-linear equations}
+
+%TCIMACRO{\TeXButton{BeginFrame}{\begin{frame}}}%
+%BeginExpansion
+\begin{frame}%
+%EndExpansion
+\frametitle{Today: (systems of) nonlinear equations}
+
+\begin{itemize}
+\item Bisection: simple univariate method
+
+\item Newton's method: from univariate to\ bivariate
+
+\begin{itemize}
+\item Derivative computation
+
+\item Secant /\ Broyden: avoiding derivatives
+\end{itemize}
+
+\item Fixed point iteration: Gauss-Jacobi/Seidel
+
+\item Continuation \& Homotopy methods
+\end{itemize}
+
+%TCIMACRO{\TeXButton{EndFrame}{\end{frame}}}%
+%BeginExpansion
+\end{frame}%
+%EndExpansion
+%TCIMACRO{\TeXButton{BeginFrame}{\begin{frame}}}%
+%BeginExpansion
+\begin{frame}%
+%EndExpansion
+\frametitle{Systems of non-linear equations }
+
+\begin{equation*}
+F(x)=0,
+\end{equation*}%
+where $x\in \mathbb{R}^{n}$, and $F:\mathbb{R}^{n}\rightarrow $ $\mathbb{R}%
+^{n}$.
+
+\begin{itemize}
+\item Zero problem: $F(x)=0$
+
+\item Fixed point problem: $F(x)=x$
+\end{itemize}
+
+Examples:
+
+\begin{itemize}
+\item Optimization FOC (\emph{naive approach})
+
+\item Games: multiple maximizing agents
+
+\item General equilibrium models: agents + market
+
+\item Z-estimators: estimator solves system
+\end{itemize}
+
+Issues:
+
+\begin{itemize}
+\item Direct solution methods rarely available: use iterative instead
+
+\item Potential multiplicity of solutions
+\end{itemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{Univariate problem: Bisection method}
+
+Solving $f(x)=0,\qquad x\in \mathbb{R}^{1},\qquad F:\mathbb{R}%
+^{1}\rightarrow $ $\mathbb{R}^{1}$
+
+\textbf{Initialization}: Find $x^{L}<x^{R}$ such that $f(x^{L})f(x^{R})<0$. 
+\newline
+Choose stopping criteria $\epsilon $ and $\delta $.
+
+\begin{enumerate}
+\item Compute $x^{M}=\frac{1}{2}(x^{L}+x^{R})$ or $x^{L}+\frac{f(x^{L})}{%
+f(x^{L})-f(x^{R})}(x^{R}-x^{L})$
+%\item Latter called "False Position Method": can be faster for "well-behaved" functions, but may be slower in other cases
+\item Compute $f(x^{M})$, the new $(x^{L},x^{R})$ is: 
+\begin{equation*}
+\left\{ 
+\begin{array}{ccc}
+(x^{L},x^{M}) & \mbox{ if } & f(x^{L})f(x^{M})<0, \\ 
+(x^{M},x^{R}) & \mbox{ otherwise.} & 
+\end{array}%
+\right.
+\end{equation*}
+
+\item Stop if $|f(x^{M})|<\delta $ or $x^{R}-x^{L}<\epsilon
+(1+|x^{L}|+|x^{R}|)$\newline
+otherwise go to step 1.
+\end{enumerate}
+
+Converges linearly to \emph{a} solution, if $f$ is continuous.
+
+
+\end{frame}%
+
+\begin{frame}%
+%EndExpansion
+\frametitle{Bisection: illustration}
+
+\scalebox{1.2}{\includegraphics{bisection.pdf}}
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{Univariate Newton(-Raphson)'s Method }
+
+\textbf{Initialization}: Choose initial guess $x^{0}$ and stopping criteria $%
+\epsilon $ and $\delta $.
+
+\begin{enumerate}
+\item Compute $f(x^{k})$. Compute the step $x^{k}$ as : 
+\begin{equation*}
+x^{k+1}=x^{k}-f(x^{k})/f^{\prime }(x^{k}).
+\end{equation*}
+
+\item If $|x^{k+1}-x^{k}|<\epsilon (1+|x^{k}|)$, go to step 3; otherwise, to
+step 1
+
+\item If $|f(x^{k+1})|<\delta $, stop and report success; \newline
+otherwise stop and report failure.
+\end{enumerate}
+
+Converges \textbf{quadratically} if:
+
+\begin{itemize}
+\item $f$ is twice continuously differentiable with $f^{\prime}(x)\neq 0$ and
+
+\item The initial guess is good (close to solution)
+% Need to add more conditions here: at a minimum, $f'(x^*)\neq 0$
+% Alo, explain region of convergence: related to radius of Taylor approximation
+\end{itemize}
+
+Bad initial guess can make Newton diverge, circle, or get stuck
+
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{Newton: illustration}
+
+\scalebox{0.9}{\includegraphics{Newton1.pdf}}
+
+
+\end{frame}%
+
+\begin{frame}
+
+\frametitle{Newton: Quadratic Convergence}
+
+\begin{itemize}
+\item Let $f(x)\in \mathcal{C}^2$ with $f(x^*)=0$ and $f^{\prime}(x^*)\neq 0$
+\item Then $\exists \epsilon>0$ s.t. $\left\vert x-x^* \right\vert<\epsilon$ implies $\underset{k\to\infty}{\lim}\frac{\left\vert x_{k+1}-x^* \right\vert}{\left\vert x_{k}-x^* \right\vert^2}=\frac{1}{2}\frac{\left\vert f^{\prime\prime}(x^*)\right\vert}{\left\vert f^{\prime}(x^*)\right\vert}$
+
+\item Proof: By Taylor's theorem (with intermediate value remainder)
+\begin{equation*}
+0=f(x^*)=f(x_{k})+f^{\prime}(x_{k})(x^*-x_{k})+\frac{1}{2}f^{\prime\prime}(\tilde{x})(x^*-x_{k})^2
+\end{equation*}
+\item Rearrange and divide by $f^{\prime}(x_k)$, then $x^*-x_{k+1}=$
+\begin{equation*}
+\frac{f(x_{k})}{f^{\prime}(x_k)}+(x^*-x_{k})=-\frac{1}{2}\frac{f^{\prime\prime}(\tilde{x})(x^*-x_{k})^2}{f^{\prime}(x_k)}
+\end{equation*}
+\item Take absolute values on each side and divide: for small enough initial error, $\left\vert x^*-x_{k}\right\vert\to 0$, and so by continuity, limit holds
+
+
+\end{itemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{Newton: Cautions}
+
+\begin{itemize}
+
+\item If  $f^{\prime}(x^*)=0$, or only $\mathcal{C}^1$, may converge but not quadratically
+\item In fact, if derivative near 0, may be slow in practice, and have small radius of convergence
+
+\item If starting point not close enough, no guarantees
+\begin{itemize}
+\item If derivative 0 at an iterate, will stop
+\item Can also cycle or explode
+\item $\to$ Start with good guess from more reliable but slower method 
+\end{itemize}
+
+
+
+\item Extensions exist based on higher order derivatives (Householder methods) with faster than quadratic convergence: rarely used since derivative computation may dominate cost
+
+
+\end{itemize}
+
+
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{Newton: "pathological" example}
+
+%Profit FOC under logit demand
+\scalebox{0.9}{\includegraphics{Newton2.pdf}}
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{Multivariate Newton: idea}
+
+\begin{center}
+$F(x)=0,\qquad x\in \mathbb{R}^{n},\qquad F:\mathbb{R}^{n}\rightarrow $ $%
+\mathbb{R}^{n}$
+
+$F=[f^{1}(x),f^{2}(x),...,f^{n}(x)]^{T}$
+\end{center}
+
+\begin{itemize}
+\item Univariate method is based on linear approximation around $x^{k}$
+
+\begin{itemize}
+\item $\Rightarrow $ Approximate $F(x)$ by 
+\begin{equation*}
+\hat{F}^{0}\left( x\right) =F(x^{0})+F_{x}(x^{0})(x-x^{0}),
+\end{equation*}%
+where $F_{x}(x)$ is the Jacobian of $F$ at $x$.
+\end{itemize}
+
+\item The approximation $\hat{F}^{0}\left( x\right) $ is equal to zero at: 
+\begin{equation*}
+x^{1}=x^{0}-[F_{x}(x^{0})]^{-1}F(x^{0}).
+\end{equation*}%
+This suggests the iteration: 
+\begin{equation*}
+x^{k+1}=x^{k}-[F_{x}(x^{k})]^{-1}F(x^{k}).
+\end{equation*}
+\end{itemize}
+
+\end{frame}%
+%EndExpansion
+%TCIMACRO{\TeXButton{BeginFrame}{\begin{frame}} }%
+%BeginExpansion
+\begin{frame}
+%EndExpansion
+\frametitle{Multivariate Newton: details}
+
+\begin{itemize}
+\item Same stopping rules as univariate version:
+
+\begin{enumerate}
+\item If $\left\Vert x^{k+1}-x^{k}\right\Vert >\epsilon (1+\left\Vert
+x^{k}\right\Vert )$, continue iterating
+
+\item If $\left\Vert F(x^{k+1})\right\Vert <\delta $, report success
+\end{enumerate}
+
+\item Starting value can be crucial:
+
+\begin{itemize}
+\item Make your best guess
+
+\item E.g. solution to a simpler version of this problem
+
+\item Continuation method (later in this lecture)
+\end{itemize}
+
+\item Potential for multiple solutions:
+
+\begin{itemize}
+\item Try many different starting values: a grid for each $x_{j}^{0}$, 
+\newline
+or random values from some reasonable interval
+\end{itemize}
+
+\item One way to prove uniqueness: FOC of concave maximization
+\end{itemize}
+
+
+\end{frame}%
+
+\begin{frame}
+
+\frametitle{Where do we get the Jacobian?}
+
+\begin{itemize}
+\item Analytic Jacobian:
+
+\begin{itemize}
+\item By hand -- can be labor-intensive
+
+\item Symbolic derivatives (e.g. in Maple) -- available in some cases; still have to code it
+\end{itemize}
+
+\item Numeric Jacobian (\emph{Finite Difference}, next slide):
+
+\begin{itemize}
+\item Precision is low, but Newton's method is robust to that
+
+\item Can be slow to compute
+\end{itemize}
+
+\item Automatic differentiation:
+
+\begin{itemize}
+\item Takes code for the function, returns code for derivative
+\item If efficiently implemented, cost is O(cost of function eval)
+\item Fortran (ADIFOR), C (ADIC), Julia (Juliadiff, etc), Python (Autograd/JAX/Torch), Matlab
+\end{itemize}
+
+\item Estimate the Jacobian within the method:
+
+\begin{itemize}
+\item \emph{Secant} (univariate), \emph{Broyden} (multivariate)
+
+\item Useful if $F_{x}\left( x\right) $ is hard to evaluate
+\end{itemize}
+\end{itemize}
+
+
+\end{frame}%
+
+\begin{frame}
+
+\frametitle{Finite difference derivatives}
+
+\begin{equation*}
+f^{\prime }\left( x\right) =\lim_{h\rightarrow 0}\frac{f(x+h)-f\left(
+x\right) }{h}=\lim_{h\rightarrow 0}\frac{f(x)-f\left( x-h\right) }{h}
+\end{equation*}
+
+\begin{itemize}
+\item One-sided finite difference. Pick $h>0$, and 
+\begin{equation*}
+\widehat{f_{+}^{\prime }\left( x\right) }=\frac{f(x+h)-f\left( x\right) }{h}
+\end{equation*}
+
+\begin{itemize}
+\item Biased on curved functions
+\end{itemize}
+
+\item Two-sided finite difference: 
+\begin{equation*}
+\widehat{f^{\prime }\left( x\right) }=\frac{f(x+h)-f\left( x-h\right) }{2h}
+\end{equation*}
+
+\item Multivariate: separate FD for each $x_{i}$
+
+\begin{itemize}
+\item Two-sided needs twice as many evaluations of $f$
+\end{itemize}
+
+\item Trade off approx vs floating point error
+\begin{itemize}
+\item $O(h)$ or $O(h^2)$ for 1, 2 sided vs $O(\frac{\epsilon}{h})$ $\to$ set $h\propto \sqrt\epsilon$ or $\epsilon^{2/3}$
+\end{itemize}
+\end{itemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{Secant method: univariate aprox. derivative}
+
+\begin{itemize}
+\item Newton method without $f^{\prime }(x)$.
+
+\item Replace the update formula%
+\begin{equation*}
+x^{k+1}=x^{k}-\frac{f(x^{k})}{f^{\prime }(x^{k})}
+\end{equation*}%
+with 
+\begin{equation*}
+x^{k+1}=x^{k}-\frac{f(x^{k})(x^{k}-x^{k-1})}{f(x^{k})-f(x^{k-1})}.
+\end{equation*}
+
+\item $f(x)$ evaluations are used to approximate the derivative
+
+\item Converges at rate $\frac{1+\sqrt{5}}{2}\approx 1.62$, i.e.
+superlinear: \newline
+faster than linear, but slower than quadratic
+\end{itemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+\frametitle{Improving reliability}
+\begin{itemize}
+\item As with Newton, Secant may fail if $f(x^{k})-f(x^{k-1})\approx 0$
+\item Popular solution is \emph{Brent's Method}
+\item Starting with bracketing points, perform secant update if $\left\vert f(x^{k})-f(x^{k-1})\right\vert>\delta$
+\item Perform bisection update otherwise
+\item Each iteration series of criteria used to decide between methods
+\item Ensures continued convergence at linear rate of bisection even if secant would get stuck
+\item But since most updates are secant updates, usually converges superlinearly
+\item Version of this is \texttt{fzero} in Matlab , option \texttt{Brent()} in \texttt{Optim.jl}, \texttt{brentq} in SciPy
+
+\end{itemize}
+
+\end{frame}%
+
+
+
+\begin{frame}%
+
+\frametitle{Broyden method: multivariate aprox. derivative}
+
+\begin{itemize}
+\item Approximates Jacobian $F_{x}$ as $J$, updated at each iteration
+
+\item Update the Jacobian estimate as: 
+\begin{equation*}
+J^{k+1}=J^{k}+\frac{1}{s^{k\prime }s^{k}}(y^{k}-J^{k}s^{k})s^{k\prime },
+\end{equation*}%
+where $y^{k}=F(x^{k+1})-F(x^{k})$, $s^{k}=x^{k+1}-x^{k}$.
+
+\item Why updates? Linear approximation gives us $n$ secant equations:%
+\begin{equation*}
+F(x^{k+1})-F(x^{k})=J^{k+1}(x^{k+1}-x^{k})
+\end{equation*}%
+-- not enough to determine the $n^{2}$ elements of Jacobian $J^{k+1}$.
+
+\item Solution: Impose $J^{k+1}q=J^{k}q$ whenever $q^{\prime }s^{k}=0$, 
+\newline
+to keep $J^{k+1}$ \textquotedblleft close\textquotedblright\ to $J^{k}$.
+
+\item $x^{k}$ converges superlinearly; $J^{k}$ might not
+\end{itemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+\frametitle{Newton \& Quasi-Newton in high dimensions}
+
+\begin{itemize}
+
+\item In large dimensions, inverse Jacobian is large linear system
+\item Helpful to approximate even when derivatives fast to calculate
+\item w/ Broyden, update equation allows fast inversion by Sherman-Morrison formula $(A +uv^{T})^{-1}=A^{-1}-\frac{A^{-1}uv^{T}A^{-1}}{1+v^{T}A^{-1}u}$
+\item Given initial inverse, update needs only matrix vector multiplies
+\item  $J_{k+1}^{-1}=J_{k}^{-1}+\frac{s_k-J^{-1}_k y_k}{s_k^{\top}J^{-1}_k y_k}s_k^{\top}J_{k}^{-1}$
+\item Each update is $O(n^2)$ instead of $O(n^3)$ for generic linear system
+\item Trade off larger $\#$ of iterates needed for faster iterates
+
+\end{itemize}
+
+\end{frame}%
+
+\begin{frame}%
+\frametitle{Newton \& Quasi-Newton in high dimensions}
+\begin{itemize}
+
+\item Newton valid up to $n=\infty$: use for PDEs, functional equations
+\item Approximation methods give large but finite matrices
+\item In many problems, Jacobian is ill-conditioned matrix
+\begin{itemize}
+\item Especially (approximations of) integral equations
+\end{itemize}
+\item Multivariate analog of (near) failure of $f^{\prime}\neq 0$ condition
+\item Similarly causes slow or non-convergence, small basin
+\item \emph{Regularize}: Replace Jacobian by invertible surrogate
+\begin{itemize}
+\item Tikhonov: $(J_k+\lambda_k I)^{-1}$ for $\lambda_k\to 0$
+\item Spectral cutoff: $SD_k^{+}V$ Zero out smallest singular values, invert remainder
+\end{itemize}
+
+\end{itemize}
+\end{frame}%
+
+
+
+\begin{frame}%
+%EndExpansion
+\frametitle{Fixed point iteration}
+
+\begin{itemize}
+\item Solving a fixed point problem: $G(x)=x$
+
+\begin{itemize}
+\item Transforming $F(x)=0$: carry out $x_{i}$ out of each $f^{i}(x)$
+\end{itemize}
+
+\item Iterate on $x^{k+1}=$ $G(x^{k})$
+
+\item Starting in neighborhood, converges to solution $x^{\ast }$ if $F$ Lipschitz \& $\rho (G_{x}(x^{\ast }))<1$
+
+\begin{itemize}
+\item Linear convergence rate = $\rho (G_{x}(x^{\ast }))$
+
+\item We do not know $x^{\ast }$, and $G_{x}(\cdot )$ can be hard to compute
+\end{itemize}
+
+\item Dampening and acceleration work as with linear eq's.
+
+\item If there are multiple solutions:
+
+\begin{itemize}
+\item "Basin of convergence" -- set of starting values that lead \newline
+to a given solution
+
+\item Some of multiple solutions will be unstable, \newline
+i.e. we can't converge to them
+\end{itemize}
+
+\end{itemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{Fixed point problem and contraction mapping}
+
+\begin{itemize}
+\item Contraction mapping: $G:\mathbb{R}^{n}\rightarrow $ $\mathbb{R}^{n}$
+such that%
+\begin{equation*}
+\left\Vert G(x)-G(y)\right\Vert \leq \beta \left\Vert x-y\right\Vert ,\qquad
+\forall x,y\in \mathbb{R}^{n}
+\end{equation*}%
+for some $\beta \in (0,1)$
+
+\item Contraction mapping theorem (Banach's fixed point): $G(x)$ is a contraction $\Rightarrow $
+
+\begin{itemize}
+\item There exists a unique fixed point $G(x^{\ast })=x^{\ast }$
+
+\item $x^{k+1}=G(x^{k})$ converges to $x^{\ast }$, for any $x^{0}$
+
+\item Convergence is linear at rate $\beta $
+\end{itemize}
+
+\item Converse also true: if iteration converges linearly to unique fixed point, $\exists$ metric in which function is contraction
+\item Many constructive existence theorems are Banach in disguise: implicit function theorem, Picard iteration for ODEs
+
+
+\end{itemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+%EndExpansion
+\frametitle{Sufficient conditions for contraction}
+
+\begin{itemize}
+
+\item \textbf{Blackwell}'s sufficient conditions for contraction ($x\in 
+\mathbb{R}^{n}$):
+
+\begin{itemize}
+\item \emph{Monotonicity}: $x\leq y$ implies $G(x)\leq G(y)$
+
+\item \emph{Discounting}: $\exists $ $\beta \in (0,1)$ such that for any $x$
+and $a\in \mathbb{R}^{1}$:\newline
+$g_{j}(\left\{ x_{i}+a\right\} _{i})\leq g_{j}(x)+\beta a$ for all $j$, 
+\newline
+where $\left\{ x_{i}+a\right\} _{i}$ is vector $x$ with $a$ added to all
+components.
+\end{itemize}
+
+\item Alternately: $G(x)$ is a \emph{differentiable contraction map} 
+\item Global convergence on compact convex set $D\subseteq\mathbb{R}^n$ if 
+\begin{itemize}
+\item $G\in\mathcal{C}^1$ 
+\item $G(D)\subseteq D$
+\item $\underset{x\in D}{\max}\left\Vert G_x(x)\right\Vert_{\infty}<1$
+\end{itemize}
+
+\end{itemize}
+
+
+\end{frame}%
+
+\begin{frame}
+
+\frametitle{Other Fixed Point Theorems}
+
+\begin{itemize}
+
+\item Brouwer/Kiyotaki/Schauder less practical than Banach 
+\begin{itemize}
+\item Every (upper hemi-)continuous function (correspondence) from closed ball to itself has a fixed point
+\end{itemize}
+\item Used to show GE, Nash equilibria exist, but nonconstructive
+\item Recent work suggests worst case takes exponential time to find even approximate solution
+\begin{itemize}
+\item Problem is \emph{PPAD complete} (c.f. Daskalakis, Papadimitriou) 
+\item Special cases can be tractable (zero sum, potential games, etc)
+\item Weaker equilibrium concepts (correlated) also tractable
+\end{itemize}
+
+\item Tarski's fixed point theorem sometimes practical
+\begin{itemize}
+\item Order preserving (monotone) function on complete lattice (all subsets have sup and inf) has nonempty ordered set of fixed points
+\item Can find smallest/largest fixed point by iteration, not others
+\end{itemize}
+
+
+
+\end{itemize}
+
+
+\end{frame}%
+
+% Add much more on contraction mapping: 
+% proof of theorem? 
+% proof of sufficiency of Blackwell's conditions?
+% Statement of converse: Any problem for which iteration converges to a unique solution is a contraction mapping wrt some metric
+% Statement of Tarski's fixed point theorem and description of Tarski iteration
+
+
+
+
+\begin{frame}%
+%EndExpansion
+\frametitle{Other methods}
+
+\begin{itemize}
+\item Re-state as least squares problem:%
+\begin{equation*}
+\min \tsum\nolimits_{i=1}^{n}[f^{i}(x)]^{2}=SSR(x)
+\end{equation*}
+
+\begin{itemize}
+\item Optimization is better studied than equations
+
+\item But can get local min, and problem is badly conditioned
+\end{itemize}
+
+\item Powell's hybrid method (a version of Dog-Leg or Safeguarding):
+
+\begin{itemize}
+\item Check if Newton reduces SSR
+
+\item If not, switch to least squares
+\end{itemize}
+
+\item Direction search along Newton's $s^{k}$: $f\left( \lambda \right)
+=SSR(F\left( x_{k}+\lambda s^{k}\right) )$
+
+\begin{itemize}
+\item Trust region: limit $\lambda $ so Taylor's approximation is accurate
+\end{itemize}
+
+\item Transform the problem to reduce curvature:
+
+\begin{itemize}
+\item E.g. $e^{x}h\left( x\right) =0\Leftrightarrow h\left( x\right) =0$
+\end{itemize}
+\end{itemize}
+
+%TCIMACRO{\TeXButton{EndFrame}{\end{frame}}}%
+%BeginExpansion
+\end{frame}%
+
+\begin{frame}%
+%EndExpansion
+\frametitle{Continuation method: smart initial guess}
+
+\begin{itemize}
+\item Introduce parameter $t$ ($x\in \mathbb{R}^{n}$ is still the variable):%
+\begin{equation*}
+H(x;t)=0,\qquad t\in \lbrack 0,1]
+\end{equation*}
+
+\begin{itemize}
+\item $t=0$ $\Longrightarrow $ $H(x;t)$ is a problem with known solution $%
+x^{0}$
+
+\item $t=1$ $\Longrightarrow $ $H(x;t)=F(x)$, the problem of interest
+\end{itemize}
+\end{itemize}
+
+\begin{enumerate}
+\item Pick sequence $0=t^{0}<t^{1}<...<t^{K}=1$
+
+\item Solve problem $H(x^{k+1};t^{k+1})=0$ for $x^{k+1}$, \newline
+\textbf{using }$x^{k}$\textbf{\ as the initial guess}.
+\end{enumerate}
+
+\begin{itemize}
+\item Constructing $H$:
+
+\begin{itemize}
+\item "Natural" parameter that makes the model simple
+
+\item "Artificial" parameter: $H(x,t)=(1-t)x+tF(x)$
+\end{itemize}
+\end{itemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+%EndExpansion
+\frametitle{Homotopy method}
+
+Exact approach to continuation
+
+\begin{itemize}
+\item We want the \emph{solution path} though the $\left( x,t\right) $%
+-space: $y(s)=(x(s),t(s))$
+
+\item Solution path is described by:%
+\begin{equation*}
+H(y(s))=0
+\end{equation*}
+
+\begin{itemize}
+\item Differentiate both sides w.r.t. $s$:%
+\begin{equation*}
+H_{y}y^{\prime }(s)=0
+\end{equation*}
+
+\item This is a differential equation, and can be solved numerically;\newline
+Starting value: $y^{0}=(x^{0},0)$
+\end{itemize}
+
+\item Path guaranteed to reach $t=1$ under reasonable conditions.
+
+% Mention that diffeqs will be discussed in later lecture. Sufficient condition's come from Picard's theorem, which is in fact, an application of contraction mapping
+\item Can be labor-intensive to implement (HOMPACK90 in Fortran)
+
+\item Can find multiple solutions $\Rightarrow $ good way to explore effects
+of a natural parameter
+\end{itemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{References}
+
+\begin{itemize}
+
+\item Judd, Ch 4 (Solvers) SciML Book Ch 8, 10 (Differentiation)
+
+\item QuantEcon. Solvers, Optimizers, and Automatic Differentiation. \url{https://julia.quantecon.org/more_julia/optimization_solver_packages.html}  
+\begin{itemize}
+\item QuantEcon tutorial on NLsolve.jl, Optim.jl, Roots.jl, LeastSquaresOptim.jl, and differentiation libraries in Julia
+\item Use these in practice, code methods yourself on problem sets
+
+\end{itemize}
+
+\item Quantecon Python Newton Tutorial \url{https://python.quantecon.org/newton_method.html}
+
+\item Ron N. Borkovsky, Ulrich Doraszelski, Yaroslav Kryukov (2010) A User's Guide to Solving Dynamic Stochastic Games Using the Homotopy Method. Operations Research 58(4-part-2) 1116-1132.
+
+\end{itemize}
+
+
+\end{frame}%
+
+% \begin{frame}%
+% 
+% \frametitle{Naive Methods}
+% 
+% \begin{itemize}
+% 
+% \item Solve $f(x)=0$, $x\in\mathcal{X}\subset \mathbb{R}^d$ bounded
+% 
+% \item Grid search 
+% \item Choose $n$ points $\{x_i\}_{i=1}^{n}\in\mathcal{X}$, evaluate $\{f(x_i)\}_{i=1}^{n}$
+% \item Choose $x_i$ s.t. $\left\vertf(x_i)\right\vert<\delta$
+% \item Even if $f$, say, Lipschitz, error is $O(n^{-\frac{1}{d}}$: exponentially slow in $d$
+% \item Compare to exponentially fast iterative methods
+% \item Pro: easily parallelizable, find multiple 0s (still no guarantees)
+% \item Improvement: start on coarse grid, use iterative method starting from each point
+% 
+% 
+% \end{itemize}
+% 
+% 
+% \end{frame}%
+% 
+% \begin{frame}%
+% 
+% \frametitle{Exact Methods for restricted classes}
+% 
+% \begin{itemize}
+% 
+% \item Suppose $f(x)$ is a (system of) order $p$ polynomial(s)
+% \item Direct formulas exist only for $p\leq 4$ 
+% \item Computer algebra systems can find \emph{all} zeros by finite iterative procedure
+% \item Not fast, but reliable: no worry about initial conditions/instability
+% 
+% 
+% 
+% \end{itemize}
+% 
+% 
+% \end{frame}
+
+
+\end{document}
