@@ -1,0 +1,853 @@
+
+\documentclass[bigger,handout]{beamer}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{mathpazo}
+\usepackage{hyperref}
+\usepackage{multimedia}
+
+\setcounter{MaxMatrixCols}{10}
+%TCIDATA{OutputFilter=LATEX.DLL}
+%TCIDATA{Version=5.50.0.2953}
+%TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
+%TCIDATA{BibliographyScheme=Manual}
+%TCIDATA{Created=Monday, October 27, 2008 15:56:24}
+%TCIDATA{LastRevised=Wednesday, April 12, 2017 15:53:03}
+%TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
+%TCIDATA{<META NAME="DocumentShell" CONTENT="Other Documents\SW\Slides - Beamer">}
+%TCIDATA{Language=American English}
+%TCIDATA{CSTFile=beamer.cst}
+
+\newenvironment{stepenumerate}{\begin{enumerate}[<+->]}{\end{enumerate}}
+\newenvironment{stepitemize}{\begin{itemize}[<+->]}{\end{itemize} }
+\newenvironment{stepenumeratewithalert}{\begin{enumerate}[<+-| alert@+>]}{\end{enumerate}}
+\newenvironment{stepitemizewithalert}{\begin{itemize}[<+-| alert@+>]}{\end{itemize} }
+\usetheme{Madrid}
+\usecolortheme{beaver}
+\usefonttheme{professionalfonts}
+\input{tcilatex}
+\setbeamertemplate{navigation symbols}{}
+\begin{document}
+
+\title[47-809: Integration \& MC]{Integration and Monte-Carlo methods}
+\subtitle{Judd Chapters 7,8,9}
+\author[David Childers]{David Childers (thanks to Y. Kryukov, K. Judd, and U. Doraszelski)}
+\institute[CMU]{CMU, Tepper School of Business}
+\date[Apr 3]{April 3, 2023}
+\maketitle
+
+\section{Integration + MC}
+
+%TCIMACRO{\TeXButton{BeginFrame}{\begin{frame}}}%
+%BeginExpansion
+\begin{frame}%
+%EndExpansion
+\frametitle{Integration and Monte-Carlo}
+
+Univariate function integration:
+
+\begin{itemize}
+\item Newton-Cotes: piecewise
+
+\item Gaussian quadrature: global
+\end{itemize}
+
+Multivariate integration:
+
+\begin{itemize}
+\item Generalizations of univariate methods
+\end{itemize}
+
+Simulation (Monte-Carlo):
+
+\begin{itemize}
+\item Random number generation
+
+\item Variance reduction
+
+\item Optimization
+\end{itemize}
+
+%TCIMACRO{\TeXButton{EndFrame}{\end{frame}}}%
+%BeginExpansion
+\end{frame}%
+%EndExpansion
+%TCIMACRO{\TeXButton{BeginFrame}{\begin{frame}}}%
+%BeginExpansion
+\begin{frame}%
+%EndExpansion
+\frametitle{Motivation}
+
+\begin{stepitemize}
+\item Evaluate 
+\begin{equation*}
+I=\int_{D}f(x)dx,
+\end{equation*}%
+where $F:\mathbb{R}^{d}\rightarrow \mathbb{R}$ and $D\subset \mathbb{R}^{d}$.
+
+\begin{stepitemize}
+\item Consumer / producer / total surplus
+
+\item Expected utility, profit, etc.
+
+\item Continuous time discounting
+
+\item Bayesian posteriors, likelihoods
+\end{stepitemize}
+
+\item Most integrals cannot be evaluated analytically
+
+\begin{stepitemize}
+\item And evaluating $f(x)$ can be costly
+\end{stepitemize}
+\end{stepitemize}
+
+%TCIMACRO{\TeXButton{EndFrame}{\end{frame}}}%
+%BeginExpansion
+\end{frame}%
+%EndExpansion
+%TCIMACRO{\TeXButton{BeginFrame}{\begin{frame}}}%
+%BeginExpansion
+\begin{frame}%
+%EndExpansion
+\frametitle{Integration and function approximation}
+
+\begin{itemize}
+\item Numerical integration -- general approach:
+
+\begin{itemize}
+\item Evaluate $f\left( x\right) $ for a few values of $x$ (nodes)
+
+\item Compute specially constructed weights for each node
+
+\item Multiply evaluations by weights, and sum the results
+\end{itemize}
+
+\item Different methods differ in choice of nodes and weights
+
+\item Choosing nodes and weights requires assumptions \newline
+on the shape of the function
+
+\item We can integrate polynomials exactly;\newline
+$\Rightarrow $ approximate our function with a polynomial
+
+\item Function approximation allows integration, but integration easier
+\begin{itemize}
+\item Just need one feature, not a uniform representation
+\end{itemize}
+
+\end{itemize}
+
+
+
+\end{frame}%
+
+\begin{frame}%
+%EndExpansion
+\frametitle{Univariate methods: overview}
+
+$f(x):\mathbb{[}a,b\mathbb{]}\rightarrow \mathbb{R}$. (will deal with
+infinite intervals later)%
+\begin{equation*}
+I=\int_{a}^{b}f(x)dx,
+\end{equation*}
+
+\textbf{Newton-Cotes}: piecewise approximation to $f(x)$ (a spline)
+
+\begin{enumerate}
+\item Split $\mathbb{[}a,b\mathbb{]}$ into subintervals, e.g. of equal
+length $h$.
+
+\item Over each interval, approximate $f$ by a low-order polynomial.
+\end{enumerate}
+
+\textbf{Gaussian Quadrature}: global polynomial approximation\newline
+Uses \emph{orthogonal polynomial} \emph{families}
+
+\begin{enumerate}
+\item Choose a family (and do the change of variable)
+
+\item Compute nodes $x_{i}$, determine weights $\omega _{i}$
+
+\item Approximate integral as $\hat{I}=\sum \omega _{i}f(x_{i})$
+\end{enumerate}
+
+%Add more rules: Exact integration of interpolations: Curtis-Clenshaw, Bayesian Quadrature/RKHS rules
+% Multivariate case: tensor product and Smolyak/sparse grid methods
+% Maybe mention something about choosing domains: nonrectangular domains
+
+% Describe information-theoretic limits (at least to mention dependence on smoothness class)
+% Adaptive methods: mention existence (choose points by local residuals: valuable for non-uniformly regular smoothness classes)
+
+%Leave monte-carlo to next class: cover classical and QMC, talk Bayes and introduce MH, Gibbs, MALA, Hamiltonian MC, cover importance sampling, sequential importance sampling. Say something about filtering and/or junction tree algorithm? (probably just: they exist) 
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{N-C: midpoint rule (step function)}
+
+\begin{enumerate}
+\item Take $n$ nodes, let $h=\left( b-a\right) /n$, and 
+\begin{equation*}
+x_{i}=a+(i-\frac{1}{2})h,\quad i=1,\ldots ,n,
+\end{equation*}
+
+\item Evaluate $f(x_{i})$
+
+\item Compute approximation:%
+\begin{equation*}
+\hat{I}_{0}=\sum hf(x_{i})
+\end{equation*}
+\end{enumerate}
+
+\begin{itemize}
+\item Then, for some $\xi \in \lbrack a,b]$, for $f\in C^2$ by Taylor expansion
+\begin{equation*}
+I=\int_{a}^{b}f(x)dx=\hat{I}+\frac{h^{2}(b-a)}{24}f^{\prime \prime }(\xi )
+\end{equation*}
+\item $O(n^{-2})$ error.
+\item \emph{Open rule}: no endpoints needed: 
+\begin{itemize}
+\item Useful if, e.g., discontinuous at boundary
+\end{itemize}
+
+\end{itemize}
+
+%Apply by integrating over fine enough grid
+%Alternately: suppose evenly spaced grid: exact for Fourier series on periodic functions: (up to) exponentially fast convergence
+
+\end{frame}%
+
+\begin{frame}%
+%EndExpansion
+\frametitle{Higher-order Newton-Cotes}
+
+\begin{stepitemize}
+\item Trapezoid rule (piecewise-linear): $O(n^{-2})$ \emph{closed rule} on $C^2$
+\begin{eqnarray*}
+f_{i} &=&f(a+ih),\quad i=0,\ldots ,n, \\
+\hat{I}_{1} &=&\frac{h}{2}\left( f_{0}+2f_{1}+\ldots +2f_{n-1}+f_{n}\right)
+\end{eqnarray*}%
+\begin{equation*}
+I=\hat{I}_{1}-\frac{h^{2}(b-a)}{12}f^{\prime \prime }(\xi ).
+\end{equation*}
+
+\item Simpson's rule (quadratic); $n$ must be even: $O(n^{-4})$ on $C^4$ 
+\begin{eqnarray*}
+\int_{x_{i}}^{x_{i+2}}f(x)dx &=&\frac{h}{3}\left[ f_{i}+4f_{i+1}+f_{i+2}%
+\right] \\
+\hat{I}_{2} &=&\frac{h}{3}\left( f_{0}+4f_{1}+2f_{2}+4f_{3}+\ldots
++4f_{n-1}+f_{n}\right)
+\end{eqnarray*}%
+\begin{equation*}
+I=\hat{I}_{2}-\tfrac{1}{180}h^{4}(b-a)f^{(4)}(\xi ).
+\end{equation*}
+\end{stepitemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+%EndExpansion
+\frametitle{Infinite intervals \& change of variable}
+
+\begin{stepitemize}
+\item Truncation risky unless tail known to decay fast: $\int_{0}^{\infty }f(x)dx\not\approx
+\int_{0}^{b}f(x)dx$
+
+\item Change of var.: $y=\phi \left( z\right) $, $\phi \in C^{1}$, $\phi
+^{\prime }>0$:%
+\begin{equation*}
+\int_{a}^{b}f(y)dy=\int_{\phi ^{-1}(a)}^{\phi ^{-1}(b)}f(\phi (z))\phi
+^{\prime }(z)dz
+\end{equation*}
+
+\item $\left( 0,1\right) $ to $\left( 0,+\infty \right) $: \ $\phi
+(z)=z/(1-z)$, $\phi ^{\prime }(z)=(1-z)^{-2}$%
+\begin{equation*}
+\int_{0}^{+\infty }f(x)dx=\int_{0}^{1}f\left( \frac{z}{1-z}\right)
+(1-z)^{-2}dz
+\end{equation*}
+
+\item $\left( 0,1\right) $ to $\left( -\infty ,+\infty \right) $: \ $\phi
+(z)=\ln [z/(1-z)]$, $\phi ^{\prime }(z)=1/\left[ z\left( 1-z\right) \right] $
+
+\item Make sure derivative of integrand remains bounded
+\end{stepitemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+%EndExpansion
+\frametitle{Orthogonal polynomials}
+
+\begin{itemize}
+\item Functions form a linear space (infinite dimensional)
+
+\item Define inner product using a weighting function $w(x)>0$:%
+\begin{equation*}
+\left\langle f,g\right\rangle =\int f(x)g(x)w(x)dx.
+\end{equation*}
+
+\item Polynomial of degree $k$: $\phi _{k}\left( x\right)
+=\sum_{i=0}^{k}\alpha _{i}x^{i}$
+
+\item The family of polynomials $\{\phi _{k}\}$ is \textbf{mutually
+orthogonal} \newline
+iff $\ \left\langle \phi _{k},\phi _{m}\right\rangle =0$ for all $k\neq m$.
+
+\begin{itemize}
+\item Mononomials ($1$, $x$, $x^{2}$, $x^{3}$, ...) are not orthogonal
+\item Orthogonal families enable efficient computation
+\end{itemize}
+
+\item Each family is defined by its weighting function
+\end{itemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+%EndExpansion
+\frametitle{Gaussian quadrature }
+
+\begin{stepitemize}
+\item Given a weighting function $w(x)$:%
+\begin{equation*}
+I=\int_{a}^{b}f(x)w(x)dx\approx \sum_{i=1}^{n}\omega _{i}f(x_{i})=\hat{I},
+\end{equation*}%
+where $\left\{ x_{i}\right\} _{i=1}^{n}$ are quadrature nodes, and\newline
+$\left\{ \omega _{i}\right\} _{i=1}^{n}$ are quadrature weights.
+
+\item Nodes and weights are chosen so the approximation is \emph{exact} \newline
+for all polynomials of degree $2n-1$ (Thm 7.2.1)
+
+\item If these polynomials are orthogonal w.r.t. $w(x)$:
+
+\begin{stepitemize}
+\item The nodes are zeros of the degree $n$ polynomial
+
+\item Weights do not depend on $f$
+
+\item =\TEXTsymbol{>} Take from tables or compute by $O(n^2)$ algorithms
+\end{stepitemize}
+\end{stepitemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{Chebyshev \& Legendre quadratures}
+
+\begin{stepitemize}
+\item Let $f:\left[ -1,1\right] \rightarrow \mathbb{R}$, $\in C^{\infty }$, $%
+f^{(n)}$ bounded.
+
+\item Gauss-\textbf{Chebyshev} quadrature: 
+\begin{equation*}
+\int_{-1}^{1}f(x)(1-x^{2})^{-\frac{1}{2}}dx=\dsum\nolimits_{i=1}^{n}\omega
+_{i}f(x_{i})+o(4^{-n}),
+\end{equation*}%
+where 
+\begin{equation*}
+x_{i}=\cos \left( \tfrac{2i-1}{2n}\pi \right) ,\quad \omega _{i}=\frac{\pi }{%
+n},\quad i=1,\ldots ,n.
+\end{equation*}
+
+\item Gauss-\textbf{Legendre} quadrature: 
+\begin{equation*}
+\int_{-1}^{1}f(x)dx=\dsum\nolimits_{i=1}^{n}\omega _{i}f(x_{i})+o(4^{-n}),
+\end{equation*}%
+see textbook for tables of $x_{i}$'s and $\omega _{i}$'s
+\end{stepitemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{Gauss-Hermite quadrature}
+
+\begin{stepitemize}
+\item Let $f:\left( -\infty ,\infty \right) \rightarrow \mathbb{R}$, $\in
+C^{\infty }$, $f^{(n)}$ bounded. Then: 
+\begin{equation*}
+\int_{-\infty }^{\infty }f(x)e^{-x^{2}}dx=\dsum\nolimits_{i=1}^{n}\omega
+_{i}f(x_{i})+o(K^{-n}),
+\end{equation*}%
+where $x_{i}$ and $\omega _{i}$, $i=1,\ldots ,n$, are tabulated.
+
+\item Typical use: expectation of a normal random variable
+
+\item Suppose $Y\sim N(\mu ,\sigma ^{2})$. Then 
+\begin{eqnarray*}
+E(f(Y)) &=&\int_{-\infty }^{\infty }f(y)\frac{1}{\sqrt{2\pi }\sigma }%
+e^{-\left( \frac{y-\mu }{\sqrt{2}\sigma }\right) ^{2}}dy \\
+&=&\frac{1}{\sqrt{\pi }}\int_{-\infty }^{\infty }f(\sqrt{2}\sigma x+\mu
+)e^{-x^{2}}dx.
+\end{eqnarray*}
+\end{stepitemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{Gauss-Laguerre quadrature}
+
+\begin{stepitemize}
+\item Let $f:\left( 0,\infty \right) \rightarrow \mathbb{R}$, $\in C^{\infty
+}$, $f^{(n)}$ bounded. Then: 
+\begin{equation*}
+\int_{0}^{\infty }f(x)e^{-x}dx=\dsum\nolimits_{i=1}^{n}\omega
+_{i}f(x_{i})+o(K^{-n}),
+\end{equation*}%
+where $x_{i}$ and $\omega _{i}$, $i=1,\ldots ,n$, are tabulated.
+
+\item Typical use: Net present value of a stream of profits.
+
+\item Suppose $\rho >0$ is the discount rate. Then 
+\begin{equation*}
+\int_{0}^{\infty }e^{-\rho t}f(t)dt=\frac{1}{\rho }\int_{0}^{\infty
+}e^{-x}f\left( \frac{x}{\rho }\right) dx.
+\end{equation*}
+\end{stepitemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{Clenshaw-Curtis quadrature}
+
+\begin{itemize}
+\item Alternative to Gauss-Legendre: $w(x)=1$ on $[-1,1]$ 
+\item Use Chebyshev points as nodes \newline 
+Use weights which exactly integrate Chebyshev interpolation
+\begin{itemize}
+\item Computable in $O(n\log (n))$
+\end{itemize}
+\item Exact only up to order $n-1$ polynomials instead of $2n-1$
+\item Handy when using Chebyshev also for function representation
+\end{itemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{Evaluation of quadrature}
+
+\begin{itemize}
+\item For analytic functions, Gauss rules converge exponentially fast
+\begin{itemize}
+\item Use tiny $n$ in many econ applications
+\end{itemize}
+\item For finitely differentiable $f$, Gauss and Clenshaw both polynomial
+\item With irregularities or unknown smoothness, use \emph{adaptive} rules
+\begin{itemize}
+\item Add points when error metric suggests inaccuracy
+\item Save calculations by reusing nodes as grid refined
+\item Curtis-Clenshaw points nested, can refine without re-evaluating
+\item Gauss-Kronod rules allow refining Gaussian quadratures (\texttt{QuadGK} in Julia, \texttt{scipy.integrate.quad} in Python)
+\item Newton-Cotes allows refinement locally for irregular functions
+\end{itemize}
+
+\end{itemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{Multi-dimensional: product rules}
+
+\begin{stepitemize}
+\item Product of nodes and weights across dimensions
+
+\item Approximate 
+\begin{equation*}
+\int_{D}F(x)dx
+\end{equation*}%
+where $F:\mathbb{R}^{d}\rightarrow \mathbb{R}$ and $D\subset \mathbb{R}^{d}$%
+, by 
+\begin{equation*}
+\sum_{i_{1}=1}^{n_{1}}\ldots \sum_{i_{d}=1}^{n_{d}}\left(
+\prod_{j=1}^{d}\omega _{i_{j}}\right) F(x_{i_{1}},\ldots ,x_{i_{d}}),
+\end{equation*}
+
+\item For dimension $j$, nodes $\left\{ x_{i_{j}}\right\} _{i_{j}=1}^{n_{j}}$
+and weights $\left\{ \omega _{i_{j}}\right\} _{i_{j}=1}^{n_{j}}$ determined
+by a univariate Newton-Cotes or Gaussian scheme.
+
+\item Curse of dimensionality: $x\in \mathbb{R}^{d}$ $\Rightarrow $ $n^{d}$
+nodes.
+\end{stepitemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{Multi-dimensional: Mononomials}
+
+\begin{stepitemize}
+\item The complete set of polynomials of total degree $k$ is 
+\begin{equation*}
+\Phi =\left\{ \left. \prod\nolimits_{j=1}^{d}\phi _{k_{j}}(x_{j})\right\vert
+\sum\nolimits_{j=1}^{n}k_{j}\leq k\right\} ,
+\end{equation*}%
+where $\phi _{k_{j}}(x_{j})$ is a polynomial of degree $k_{j}$ in $x_{j}$.
+
+\item Impose exact integral of polynomials in $\Phi $, i.e. \newline
+find nodes $\left\{ x^{i}\right\} _{i=1}^{n}$ and weights $\left\{ \omega
+_{i}\right\} _{i=1}^{n}$ such that 
+\begin{equation*}
+\dsum\nolimits_{i=1}^{n}\omega _{i}\phi (x^{i})=\int_{D}\phi (x)dx,\quad
+\forall \phi \in \Phi .
+\end{equation*}%
+$|\Phi |$ conditions, $nd+n$ unknowns %hard to solve
+\item Efficient solution methods exist in special cases
+%Alternately: computable by precomputing large linear system in Vandermonde matrix
+%Or remove terms efficiently: consider sparse grid with few points: leads to sparse grid/Smolyak rules 
+
+\item Approximate as $\hat{I}=\dsum\nolimits_{i=1}^{n}\omega _{i}F(x^{i})$
+\item Smolyak sparse grids make high dimensional ($d\approx 10-20$) integrals feasible if $f$ reasonably smooth
+\end{stepitemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{Monte - Carlo methods}
+
+\begin{stepitemize}
+\item Standard quadrature rules rely on properties of function
+\item An alternative independent of dimension or smoothness 
+
+\item $\Rightarrow $ Generate nodes randomly: $X_{i}\sim U[D]$
+
+\item $\Rightarrow $ Assign equal weights:%
+\begin{equation*}
+I=\int_{0}^{1}f(x)dx=E[f(X)]\approx \frac{1}{N}\sum%
+\nolimits_{i=1}^{N}f(x_{i})=\hat{I}
+\end{equation*}
+
+\item Law of Large Numbers and Central Limit theorem \newline
+ensure \emph{eventual} convergence, at rate $N^{-1/2}$ 
+
+\item Very slow relative to quadrature in low dimensions
+\item Close to optimal in high dimensions
+
+\begin{itemize}
+\item Certain tricks to speed it up
+\end{itemize}
+
+\item One requirement: random numbers
+%Practical issue 1: random algorithm has "probability" of inaccuracy
+%Practical issue 2: need to generate random numbers by algorithm
+% Philosophical issue: (non-quantum) computers are deterministic: algorithm is only "pseudo-random"
+% Point set has some but not all properties of randomness: proportion of points in some interval is uniform, etc, but pattern "predictable" (albeit chaotic)
+% If RNG algorithm good, can effectively treat as probability: most times you run algorithm, it will perform well, sometimes it won't. In principle could "know" which are which, but in practice not feasible.
+% Practical solution: run multiple times and check
+% Good practice: before run, set seed, so you can run again with same random numbers
+
+
+
+\end{stepitemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{Quasi-random numbers: Weyl}
+
+\begin{itemize}
+\item Ignore statistical properties; focus on suitability for numeric
+integration
+
+\item Sequence $x_{j}\in \left[ 0,1\right] $ is \textbf{equidistributed} if:%
+\begin{equation*}
+\lim_{n\rightarrow \infty }\frac{1}{n}\sum\nolimits_{j=1}^{n}f\left(
+x_{j}\right) =\int_{0}^{1}f\left( x\right) dx
+\end{equation*}
+
+\item E.g. \emph{Weyl sequence}: for any irrational number $\theta $:%
+\begin{equation*}
+y_{j}=\func{mod}\left\{ j\theta \right\}
+\end{equation*}
+
+\begin{itemize}
+\item $\Rightarrow $ sequence $y_{j}$ is equidistributed
+\end{itemize}
+
+\item For multidimensional draws, each dimension uses \newline
+a different sequence (i.e. different $\theta $)
+
+\item Better results than classical pseudo-random numbers in large samples
+\end{itemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{Quasi-random numbers: Halton}
+
+\begin{itemize}
+\item Another criterion: discrepancy = difference from Uniform density
+
+\item Let $X=\left\{ x_{1},...,x_{N}\right\} \subset \left[ 0,1\right] $. 
+\textbf{Discrepancy} is: 
+\begin{equation*}
+D_{N}\left( X\right) =\sup_{0\leq a<b\leq 1}\left\vert \frac{1}{N}%
+count\left\{ X\cap \left[ a,b\right] \right\} -\left( b-a\right) \right\vert
+\end{equation*}
+
+\begin{itemize}
+\item $count$ means number of elements
+
+\item lowest possible value: $D_{N}\left( X\right) =1/\left( N+1\right) $, 
+\newline
+achieved by $\left\{ x_{i}=i/\left( N+1\right) \right\} $
+
+\item we want a practical sequence that comes close
+\end{itemize}
+
+\item E.g. \emph{Halton sequence}, for a prime number $p$:
+
+\begin{itemize}
+\item First $p$ elements are numbers $i/p$, $i=0,...,p-1$
+
+\item Then numbers $i/p^{2}$ ($i<p^{2}$) that weren't picked yet
+
+\item Then $i/p^{3}$, and so on: refining the grid
+\end{itemize}
+
+\item Matlab: \texttt{haltonset()} to setup, \texttt{net()} to draw
+\item Julia: Option \texttt{LowDiscrepancySequence} in \href{https://github.com/SciML/QuasiMonteCarlo.jl}{QuasiMonteCarlo.jl}
+\item Python: \texttt{Halton} in \href{https://docs.scipy.org/doc/scipy/reference/stats.qmc.html}{scipy.stats.qmc}
+\end{itemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{Variance reduction techniques}
+
+\begin{stepitemize}
+\item \textbf{Antithetic variates}. Monotonic $f:\left[ 0,1\right]
+\rightarrow \mathbb{R}$\newline
+$\Rightarrow cov\{f(x),f(1-x)\}$\TEXTsymbol{<}$0$, and%
+\begin{equation*}
+\hat{I}_{f}^{a}=\frac{1}{2N}\sum_{i=1}^{N}\left[ f(x_{i})+f(1-x_{i})\right]
+\end{equation*}%
+has lower variance than plain Monte Carlo. {\small \bigskip }
+
+\item \textbf{Control variates}: $\phi $ is similar to $f$ and easy to
+integrate. 
+\begin{equation*}
+\int_{0}^{1}f(x)dx=\int_{0}^{1}\phi (x)dx+\int_{0}^{1}(f(x)-\phi (x))dx
+\end{equation*}
+
+$\Rightarrow $ integrate $\phi $ analytically, Monte Carlo on $(f-\phi )$.
+\end{stepitemize}
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{Importance sampling}
+
+\begin{stepitemize}
+\item Suppose $p(x)$ is a common pdf. Note 
+\begin{equation*}
+I_{f}=\int_{0}^{1}f(x)dx=\int_{0}^{1}\frac{f(x)}{p(x)}p(x)dx=E_{p(x)}\left[ 
+\frac{f(x)}{p(x)}\right]
+\end{equation*}
+
+\item Draw $\{x_{i}\}_{i=1}^{N}$ from pdf $p(x)$, approximate $I_{f}$ by 
+\begin{equation*}
+\hat{I}_{f}^{p}=\frac{1}{N}\sum\nolimits_{i=1}^{N}\frac{f(x_{i})}{p(x_{i})}.
+\end{equation*}%
+$\hat{I}_{f}^{p}$ is an unbiased estimate of $I_{f}$ with variance 
+\begin{equation*}
+V^{p}=\frac{1}{N}\left( \int_{0}^{1}\frac{f(x)^{2}}{p(x)}dx-I_{f}^{2}\right)
+.
+\end{equation*}
+
+\item If $f(x)\geq 0$ and $p(x)=f(x)/I_{f}$, then $V^{p}=0$. \newline
+In practice, find a $p$ that is similar to $f$.
+
+\item Thin-tails problem: $f(x)^{2}/p(x)$ can blow up $V^{p}$.
+\end{stepitemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{8.4 Stochastic approximation}
+
+\begin{stepitemize}
+\item Solving expected utility problem%
+\begin{equation*}
+\max_{x\in X}U(x),\qquad U(x)=E_{Z}[u(x,Z)]
+\end{equation*}
+
+\item Do not want to compute $E_{Z}[u(x,Z)]$ for every $x$
+
+\item Given a draw $z_{k}$, $u_{x}(x,z_{k})$ is an unbiased estimate of $%
+U_{x}(x)$
+
+\item Steepest descent: $x_{k+1}=x_{k}+\lambda _{k}U_{x}(x_{k})$, $\lambda
+_{k}=\arg \max $...
+
+\item Stochastic gradient: $x_{k+1}=x_{k}+\lambda _{k}u_{x}(x_{k},z_{k})$, 
+\newline
+$\lambda _{k}$ -- predetermined (e.g. $\lambda _{k}=1/k$)
+
+\item Many small steps; direction is random but correct on average.
+
+\item Robbins-Monro conditions for convergence: \newline
+$\lambda _{k}\rightarrow 0$, $\qquad \sum_{k=1}^{\infty }\lambda _{k}=\infty 
+$, $\qquad \sum_{k=1}^{\infty }\lambda _{k}^{2}<\infty $.
+\end{stepitemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{8.5 Simulated objective}
+
+\begin{stepitemize}
+\item Same expected utility problem%
+\begin{equation*}
+\max_{x\in X}U(x),\qquad U(x)=E_{Z}[u(x,Z)]
+\end{equation*}
+
+\item Draw $\left\{ z_{i}\right\} _{i=1}^{N}$, replace $U(x)=E(u(x,Z))$ by 
+\begin{equation*}
+\hat{U}(x)=\frac{1}{N}\sum\nolimits_{i=1}^{N}u(x,z_{i})
+\end{equation*}
+
+\item Draw $\left\{ z_{i}\right\} _{i=1}^{N}$ once, maximize $\hat{U}(x)$
+instead of $U(x)$.
+
+\item Natural interpretation: replacing continuous distribution of $Z$ with
+a discrete one.
+
+\item Computing $\hat{U}_{x}$ is easy if you have $u_{x}$.
+\item In econometrics, need $N>>$ sample size for accurate inference
+\end{stepitemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{MCMC: Markov Chain Monte Carlo}
+
+\begin{itemize}
+
+\item Distribution $p(z)$ only known up to scale: $p(z)=\frac{f(z)}{\int f(z)dz}$
+\begin{itemize}
+\item E.g. Bayesian Posterior: $p(z|y)=\frac{p(y|z)p(z)}{\int p(y|z)p(z)dz}$
+\end{itemize}
+\item Direct sampling would require knowing $\int f(z)dz$ already 
+
+
+
+\item Construct Markov chain $\tilde{p}(z^{t+1}|z^{t})$ s.t. paths $\left\{ z^{t}\right\} _{t=1}^{T}$ have distribution drawn from $p(z)$, so $\frac{1}{T}\sum_{t=1}^{T}g(z^t)\overset{p}{\rightarrow}\int g(z)p(z)dz$ 
+
+%\begin{itemize}
+%\item To reduce serial correlation, thin out the draws:\newline
+%e.g. keep every $T$th
+%
+%\item Burn-in: Drop first few hundred draws to eliminate effect of starting value
+%\end{itemize}
+
+\item Metropolis-Hastings: starting at $z^0$, repeat $T$ times:
+
+\begin{enumerate}
+\item Draw $\tilde{z}^{\prime}$ from \emph{proposal distribution} $g(z^{\prime}|z^t)$, e.g. $z^{\prime}\sim N(z^t,\Sigma)$ 
+
+\item Calculate \emph{Acceptance probability} $A=\min(1,\frac{f(z^{\prime})}{f(z^t)}\frac{g(z^t|z^{\prime})}{g(z^{\prime}|z^t)})$
+
+\item With probability $A$, \emph{accept}: $z^{t+1}=z^{\prime}$ \newline
+Otherwise, \emph{reject}: $z^{t+1}=z^{t}$
+\end{enumerate}
+\item Method only uses ratio, so never need normalizing constant
+\item Many variants: modify proposal distribution or chain itself
+
+
+\end{itemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{MCMC Variants and extensions}
+
+\begin{itemize}
+
+\item Gibbs: Sample $p(z_{1},\ldots,z_{n})$ by alternately sampling $p(z_{i}|z_{-i})$
+
+\begin{itemize}
+\item Exploits closed form conditionals for coordinates
+\end{itemize}
+
+\item Hybrid/Hamiltonian Monte Carlo adds momentum term to draw 
+\begin{itemize}
+\item Uses gradients for faster sampling
+\end{itemize}
+
+\item Sequential Monte Carlo/particle filter combines MCMC and IS
+
+\begin{itemize}
+\item Latent variables: integrate out then again to get posterior
+\end{itemize}
+
+\item Burn-in, thinning, tempering, and diagnostics can help 
+\item Use \emph{Probabilistic Programming Language} e.g. \href{https://turing.ml/}{Turing} or \href{https://mc-stan.org/}{Stan} to build and sample from distribution
+
+\end{itemize}
+
+
+\end{frame}%
+
+
+\begin{frame}%
+
+\frametitle{References}
+
+\begin{itemize}
+
+\item Julia: \href{https://julia.quantecon.org/more_julia/general_packages.html}{QuantEcon}, \href{https://github.com/SciML/Quadrature.jl}{Quadrature.jl}, 
+\item \texttt{SciPy}: \href{https://docs.scipy.org/doc/scipy/reference/integrate.html}{integrate}, \href{https://docs.scipy.org/doc/scipy/reference/stats.qmc.html}{stats.qmc}
+
+\item MCMC and Bayesian computation
+\begin{itemize}
+\item Chi Feng \href{https://chi-feng.github.io/mcmc-demo/}{The Markov-chain Monte Carlo Interactive Gallery}
+\item Ed Herbst and Frank Schorfheide (2016) \emph{Bayesian Estimation of DSGE Models} or Schorfheide handbook chapter for macro applications
+\item Nicolas Chopin and James Ridgway (2017) "Leave Pima Indians Alone: Binary Regression as a Benchmark for Bayesian Computation"  Statist. Sci. 32(1): 64-87 for sampler choices
+\end{itemize}
+
+\end{itemize}
+
+
+\end{frame}%
+
+
+
+\end{document}
