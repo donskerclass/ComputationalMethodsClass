@@ -333,7 +333,7 @@ for all polynomials of degree $2n-1$ (Thm 7.2.1)
 
 \item Weights do not depend on $f$
 
-\item =\TEXTsymbol{>} Take from tables or compute by $O(n^2)$ algorithms
+\item =\TEXTsymbol{>} Take from tables or compute by $O(n)$ algorithms (older algorithms $O(n^2)$)
 \end{stepitemize}
 \end{stepitemize}
 
@@ -430,7 +430,7 @@ where $x_{i}$ and $\omega _{i}$, $i=1,\ldots ,n$, are tabulated.
 \item Use Chebyshev points as nodes \newline 
 Use weights which exactly integrate Chebyshev interpolation
 \begin{itemize}
-\item Computable in $O(n\log (n))$
+\item Weights computable in $O(n)$ ($O(n \log(n))$ for full interpolation) 
 \end{itemize}
 \item Exact only up to order $n-1$ polynomials instead of $2n-1$
 \item Handy when using Chebyshev also for function representation
@@ -833,7 +833,7 @@ Otherwise, \emph{reject}: $z^{t+1}=z^{t}$
 
 \begin{itemize}
 
-\item Julia: \href{https://julia.quantecon.org/more_julia/general_packages.html}{QuantEcon}, \href{https://github.com/SciML/Quadrature.jl}{Quadrature.jl}, 
+\item Julia: \href{https://julia.quantecon.org/more_julia/general_packages.html}{QuantEcon}, \href{https://github.com/SciML/Integrals.jl}{Integrals.jl}
 \item \texttt{SciPy}: \href{https://docs.scipy.org/doc/scipy/reference/integrate.html}{integrate}, \href{https://docs.scipy.org/doc/scipy/reference/stats.qmc.html}{stats.qmc}
 
 \item MCMC and Bayesian computation
