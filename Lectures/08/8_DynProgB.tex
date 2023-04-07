@@ -1,0 +1,816 @@
+%2multibyte Version: 5.50.0.2953 CodePage: 1252
+
+\documentclass[bigger,handout]{beamer}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{mathpazo}
+\usepackage{hyperref}
+\usepackage{multimedia}
+\usepackage{pgfpages}
+
+\setcounter{MaxMatrixCols}{10}
+%TCIDATA{OutputFilter=LATEX.DLL}
+%TCIDATA{Version=5.50.0.2953}
+%TCIDATA{Codepage=1252}
+%TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
+%TCIDATA{BibliographyScheme=Manual}
+%TCIDATA{Created=Monday, October 27, 2008 15:56:24}
+%TCIDATA{LastRevised=Wednesday, April 19, 2017 15:49:56}
+%TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
+%TCIDATA{<META NAME="DocumentShell" CONTENT="Other Documents\SW\Slides - Beamer">}
+%TCIDATA{Language=American English}
+%TCIDATA{CSTFile=beamer.cst}
+
+\newenvironment{stepenumerate}{\begin{enumerate}[<+->]}{\end{enumerate}}
+\newenvironment{stepitemize}{\begin{itemize}[<+->]}{\end{itemize} }
+\newenvironment{stepenumeratewithalert}{\begin{enumerate}[<+-| alert@+>]}{\end{enumerate}}
+\newenvironment{stepitemizewithalert}{\begin{itemize}[<+-| alert@+>]}{\end{itemize} }
+\usetheme{Madrid}
+\usecolortheme{beaver}
+\usefonttheme{professionalfonts}
+\input{tcilatex}
+\setbeamertemplate{navigation symbols}{}
+\begin{document}
+
+\title[47-809: Dyn.Prog.]{Dynamic Programming - II}
+\subtitle{Judd Chapter 12}
+\author[David Childers]{David Childers (thanks to Y. Kryukov, K. Judd, and U. Doraszelski)}
+\institute[CMU]{CMU, Tepper School of Business}
+\date[Apr 10-12]{April 10 - 12, 2023}
+\maketitle
+
+%TCIMACRO{\TeXButton{BeginFrame}{\begin{frame}}}%
+%BeginExpansion
+\begin{frame}%
+%EndExpansion
+\frametitle{Agenda}
+
+\begin{itemize}
+\item We can solve any combination of features:
+
+\begin{itemize}
+\item Time: Discrete ($\sum_{t=0}^{T}\beta ^{t}$) or continuous ($%
+\int_{0}^{T}e^{-\rho t}$)
+
+\item State: discrete or continuous
+
+\item State transition: deterministic or stochastic
+\end{itemize}
+\end{itemize}
+
+\begin{enumerate}
+\item Theory: Discrete time
+
+\item Computation with discrete states: Value \& Policy iterations
+
+\item now: \textbf{Computation with continuous state}
+
+\begin{enumerate}
+\item Discretization: reduce to previous model
+
+\item Value function iteration
+
+\item Projection
+\end{enumerate}
+
+\item \textbf{Continuous time: mostly theory}
+
+\begin{enumerate}
+\item Deterministic transition
+
+\item Stochastic transition: Jumps and Brownian motion
+\end{enumerate}
+\end{enumerate}
+
+%TCIMACRO{\TeXButton{EndFrame}{\end{frame}}}%
+%BeginExpansion
+\end{frame}%
+%EndExpansion
+%TCIMACRO{\TeXButton{BeginFrame}{\begin{frame}}}%
+%BeginExpansion
+\begin{frame}%
+%EndExpansion
+\frametitle{Continuous state: discretization}
+
+Write a discrete-state problem that's "similar" to the continuous-state one
+
+\begin{itemize}
+\item Support of $x:$ grid of equally spaced points
+
+\begin{itemize}
+\item Multidimensional $x$ $\Rightarrow $ large grid
+\end{itemize}
+
+\item Law of motion:
+
+\begin{itemize}
+\item Easiest: assume determininstic transitions, but this can lead to weird
+solution
+
+\item Alternative: choose $q_{ij}\left( u\right) $ so $\sum%
+\nolimits_{j=1}^{n}q_{ij}(u)V_{j}\approx V\left( x^{+}\left( x_{i},u\right)
+\right) $.\newline For sparsity: make $q_{ij}\left( u\right) =0$ if $j$ is far from $i$
+\end{itemize}
+\end{itemize}
+
+%TCIMACRO{\TeXButton{EndFrame}{\end{frame}}}%
+%BeginExpansion
+\end{frame}%
+%EndExpansion
+%TCIMACRO{\TeXButton{BeginFrame}{\begin{frame}}}%
+%BeginExpansion
+\begin{frame}%
+%EndExpansion
+\frametitle{Discretization example - optimal growth}
+
+\begin{eqnarray*}
+V(k) &=&\max_{c}u(c)+\beta V(k^{+}) \\
+\,\text{s.t.} &:&k^{+}=f(k)-c
+\end{eqnarray*}
+
+\begin{itemize}
+\item Discretize state: $k\in K=\{k_{1},k_{2},\ldots ,k_{n}\}$
+
+\item With deterministic state transition
+
+\begin{itemize}
+\item Equivalent to using next period's state as control%
+\begin{equation*}
+V(k)=\max_{k^{+}\in K}u(f(k)-k^{+})+\beta V(k^{+})
+\end{equation*}
+\end{itemize}
+
+\item Stochastic state transition:%
+\begin{equation*}
+V(k)=\max_{c}u(c)+\beta \tsum\nolimits_{j=1}^{n}V(k_{j})q_{ij}\left( c\right)
+\end{equation*}
+\end{itemize}
+
+%TCIMACRO{\TeXButton{EndFrame}{\end{frame}}}%
+%BeginExpansion
+\end{frame}%
+%EndExpansion
+%TCIMACRO{\TeXButton{BeginFrame}{\begin{frame}}}%
+%BeginExpansion
+\begin{frame}%
+%EndExpansion
+\frametitle{Optimal Growth + deterministic transition}
+
+\begin{stepitemize}
+\item Discrete time:
+\begin{equation*}
+\begin{array}{rc}
+\max_{\left\{ c_{t}\right\} } & \sum_{t=0}^{\infty }\beta ^{t}u\left(
+c_{t}\right) \\
+\text{subject to:} & k_{t+1}-k_{t}=f\left( k_{t}\right) -c_{t}%
+\end{array}%
+\end{equation*}
+
+\item ... and state: $k\in K=\{k_{1},k_{2},\ldots ,k_{n}\}$
+
+\item Constraint implies that: $c_{t}=k_{t}+f\left( k_{t}\right) -k_{t+1}$,
+so%
+\begin{equation*}
+\max\nolimits_{\left\{ k_{t}\right\} }\sum\nolimits_{t=0}^{\infty }\beta
+^{t}u\left( k_{t}+f\left( k_{t}\right) -k_{t+1}\right)
+\end{equation*}
+
+\begin{stepitemize}
+\item I.e. we limit $c\left( k\right) $ to a discrete set of values
+\end{stepitemize}
+
+\item Formulate Bellman equation:%
+\begin{equation*}
+V(k)=\max_{k^{+}\in K}u(k+f(k)-k^{+})+\beta V(k^{+})
+\end{equation*}
+\end{stepitemize}
+
+%TCIMACRO{\TeXButton{EndFrame}{\end{frame}}}%
+%BeginExpansion
+\end{frame}%
+%EndExpansion
+%TCIMACRO{\TeXButton{BeginFrame}{\begin{frame}}}%
+%BeginExpansion
+\begin{frame}%
+%EndExpansion
+\frametitle{Cont. state: Approximation + Value iteration}
+
+\begin{itemize}
+\item Approximate the value function as $\hat{V}(x;a)$,
+
+\begin{itemize}
+\item Can use polynomials or splines
+
+\item $a=$ vector of coefficients
+\end{itemize}
+
+\item Keep iterating on Bellman equation
+
+\begin{itemize}
+\item i.e. solving it at nodes $x_{i}$, $i=1:n$
+\end{itemize}
+
+\item Use approximation to evaluate $\beta \mathbf{E}V\left( x^{+}\right) $
+
+\begin{itemize}
+\item $\hat{V}(x;a)$ must be computed for any $x$ (not just nodes)
+\end{itemize}
+
+\item Updating $V$ means updating the coefficients
+
+\begin{itemize}
+\item Use solutions to Bellman at nodes
+\end{itemize}
+\end{itemize}
+
+%TCIMACRO{\TeXButton{EndFrame}{\end{frame}}}%
+%BeginExpansion
+\end{frame}%
+%EndExpansion
+%TCIMACRO{\TeXButton{BeginFrame}{\begin{frame}}}%
+%BeginExpansion
+\begin{frame}%
+%EndExpansion
+\frametitle{Cont. state: Approx + Value/Policy iteration}
+
+\begin{enumerate}
+\item Pick nodes $\left\{ x_{i}\right\} _{i=1}^{n}$ (e.g. poly. roots) \&
+initial guess $a^{0}$.
+
+\item Solve Bellman at nodes. For each $i=1,\ldots ,n$:
+\begin{equation*}
+V_{i}:=\max_{u}\pi (x_{i},u)+\beta \int \hat{V}(x^{+};a^{k})dF(x^{+},x_{i},u)
+\end{equation*}
+
+\item Update approximation:
+
+\begin{itemize}
+\item Choose $a^{k+1}$ to minimize $\left\{ \hat{V}(x_{i};a^{k+1})-V_{i}%
+\right\} _{i=1}^{n}$,
+
+\item e.g. using Chebyshev formula or OLS
+\end{itemize}
+
+\item (Optional) $W_i:=\pi (x_{i},u_i^*)+\beta \int \hat{V}(x^{+};a^{k+1})dF(x^{+},x_{i},u_i^*)$
+\begin{itemize}
+\item Return to 3 to approximate and repeat 3-4 for m steps
+\item Or solve for $\{V_i\}_{i=1}^{n}$ given $u^*$ directly for Policy Iteration
+\item If interpolation and integration linear, this is linear system
+\end{itemize}
+
+\item If $||\hat{V}(x;a^{k+1})-\hat{V}(x;a^{k})||<\epsilon $, stop; o/w,
+step 2.
+
+\begin{itemize}
+\item Alternative criterion: $||a^{k+1}-a^{k}||<\epsilon $
+\end{itemize}
+\end{enumerate}
+
+%TCIMACRO{\TeXButton{EndFrame}{\end{frame}}}%
+%BeginExpansion
+\end{frame}%
+%EndExpansion
+%TCIMACRO{\TeXButton{BeginFrame}{\begin{frame}}}%
+%BeginExpansion
+\begin{frame}%
+%EndExpansion
+\frametitle{Cont. state: Approximation + Projection}
+
+\begin{itemize}
+\item Original problem:%
+\begin{equation*}
+V(x)=\max_{u}\pi (x,u)+\beta \int V(x^{+})dF(x^{+},x,u)
+\end{equation*}
+
+\item Compute FOC:%
+\begin{equation*}
+0=\pi _{u}(x,u)+\beta \int V(x^{+})dF_{u}(x^{+},x,u)
+\end{equation*}
+
+\item If FOC is sufficient, optimal $V(x)$ and $U(x)$ must satisfy:
+\begin{gather*}
+V(x)=\pi (x,U(x))+\beta \int V(x^{+})dF(x^{+},x,U(x)), \\
+0=\pi _{u}(x,U(x))+\beta \int V(x^{+})dF_{u}(x^{+},x,U(x)).
+\end{gather*}
+\end{itemize}
+
+%TCIMACRO{\TeXButton{EndFrame}{\end{frame}}}%
+%BeginExpansion
+\end{frame}%
+%EndExpansion
+%TCIMACRO{\TeXButton{BeginFrame}{\begin{frame}}}%
+%BeginExpansion
+\begin{frame}%
+%EndExpansion
+\frametitle{Cont. state: Approximation + Projection}
+
+Solving for unknown $V(\cdot )$ and $U(\cdot )$
+
+\begin{itemize}
+\item Set up polynomial approximation $\hat{V}(x;a)$ and $\hat{U}(x;b)$
+
+\begin{itemize}
+\item Degree $N$ approximations $\Rightarrow \ \left\{ a,b\right\} \in
+\mathbb{R}^{2(N+1)}$
+\end{itemize}
+
+\item Pick $N+1$ nodes $x_{i}$ -- e.g. polynomial roots
+
+\item System of equations$,$ $i=1:N+1:$%
+\begin{eqnarray*}
+-\hat{V}(x_{i})+\pi (x_{i},\hat{U}(x_{i}))+\beta \int \hat{V}%
+(x^{+})dF(x^{+},x_{i},\hat{U}(x_{i})) &=&0 \\
+\pi _{u}(x_{i},\hat{U}(x_{i}))+\beta \int \hat{V}(x^{+})dF_{u}(x^{+},x_{i},%
+\hat{U}(x_{i})) &=&0
+\end{eqnarray*}
+
+\begin{itemize}
+\item where $\hat{V}(x_{i})\equiv \hat{V}(x;a)$, $\hat{U}(x_{i})\equiv \hat{U%
+}(x;b)$
+
+\item Variables: $\left\{ a,b\right\} \in \mathbb{R}^{2(N+1)}$
+\end{itemize}
+\end{itemize}
+
+%TCIMACRO{\TeXButton{EndFrame}{\end{frame}}}%
+%BeginExpansion
+\end{frame}%
+%EndExpansion
+%TCIMACRO{\TeXButton{BeginFrame}{\begin{frame}}}%
+%BeginExpansion
+\begin{frame}%
+%EndExpansion
+\frametitle{Continuous-time notation}
+
+\begin{itemize}
+\item All variables are function of time: $x\equiv x\left( t\right) ,$ $%
+u\equiv u\left( t\right) $
+
+\item Payoff $\pi \left( x,u\right) $ is a flow / rate, in \$/period:
+
+\begin{itemize}
+\item Profit during the first year is $\int_{0}^{1}\pi \left( x,u\right) dt$
+
+\item Analogy: distance travelled in one hour is $\int_{0}^{1}speed\left(
+t\right) dt$
+\end{itemize}
+
+\item Dot = derivative w.r.t. time: $\dot{x}=\frac{\partial }{\partial t}%
+x\left( t\right) $
+
+\begin{itemize}
+\item Law of motion: $\dot{x}=f(x,u)$
+
+\item $f(x,u)$ = rate of change in $x$, units per period.
+\end{itemize}
+\end{itemize}
+
+%TCIMACRO{\TeXButton{EndFrame}{\end{frame}}}%
+%BeginExpansion
+\end{frame}%
+%EndExpansion
+%TCIMACRO{\TeXButton{BeginFrame}{\begin{frame}}}%
+%BeginExpansion
+\begin{frame}%
+%EndExpansion
+\frametitle{Continuous time: deterministic transition}
+
+\begin{stepitemize}
+\item Time, state \& law of motion are all continuous:%
+\begin{equation*}
+\begin{array}{rl}
+\max_{u} & \int_{0}^{\infty }e^{-\rho t}\pi \left( x,u\right) dt \\
+\text{subject to:} & \dot{x}=f(x,u),\qquad x(0)=x_{0}%
+\end{array}%
+\end{equation*}
+
+\item Bellman becomes Hamilton-Jacobi-Bellman:%
+\begin{equation*}
+\rho V(x)=\max_{u}\pi \left( x,u\right) +V^{\prime }(x)f(x,u)
+\end{equation*}
+
+\begin{itemize}
+\item Note that equation is in terms of flows
+\end{itemize}
+
+\item Intuition: $V(x)$ should remain constant if $x$ does not change
+
+\begin{stepitemize}
+\item $\pi \left( x,u\right) $ = flow of current profits
+
+\item $V^{\prime }(x)f(x,u)$ = flow of value from change in state
+
+\item $\rho V(x)$ = decline in value over time
+\end{stepitemize}
+\end{stepitemize}
+
+%TCIMACRO{\TeXButton{EndFrame}{\end{frame}}}%
+%BeginExpansion
+\end{frame}%
+%EndExpansion
+%TCIMACRO{\TeXButton{BeginFrame}{\begin{frame}}}%
+%BeginExpansion
+\begin{frame}%
+%EndExpansion
+\frametitle{Continuous-time Bellman -- derivation}
+
+\begin{stepitemize}
+\item Discrete-time Bellman over time period $h\rightarrow 0$:%
+\begin{equation*}
+V(x)=\max_{u}h\pi \left( x,u\right) +e^{-h\rho }V(x+hf(x,u))
+\end{equation*}
+
+\item Linear approximation to $e^{-h\rho }$ and $V(x+hf(x,u))$ at $h=0$%
+\begin{equation*}
+V(x)=\max_{u}h\pi \left( x,u\right) +\left( 1-h\rho \right) \left[
+V(x)+hV^{\prime }(x)f(x,u)\right]
+\end{equation*}
+
+\item Open brackets and transform:%
+\begin{equation*}
+h\rho V(x)=\max_{u}h\pi \left( x,u\right) +\left( 1-h\rho \right) hV^{\prime
+}(x)f(x,u)
+\end{equation*}
+
+\item Divide by $h$: it cancels out in all but one term.
+
+\item Take limit at $h\rightarrow 0$:%
+\begin{equation*}
+\rho V(x)=\max_{u}\pi \left( x,u\right) +V^{\prime }(x)f(x,u)
+\end{equation*}
+\end{stepitemize}
+
+%TCIMACRO{\TeXButton{EndFrame}{\end{frame}}}%
+%BeginExpansion
+\end{frame}%
+%EndExpansion
+%TCIMACRO{\TeXButton{BeginFrame}{\begin{frame}}}%
+%BeginExpansion
+\begin{frame}%
+%EndExpansion
+\frametitle{Continuous time + jumps in state}
+
+\begin{itemize}
+\item Every once in a while, hurricane wipes out $s$ capital
+
+\item \emph{Poisson arrival process}: time between hurricanes follows
+Exponential distribution with mean $1/\mu $
+
+\item Bellman equation gets an extra term:%
+\begin{equation*}
+\rho V(x)=\max_{u}\pi \left( x,u\right) +V^{\prime }(x)f(x,u)+\mu \left[
+V(x-s)-V(x)\right]
+\end{equation*}
+
+\begin{itemize}
+\item $\mu $ = arrival rate of event (events per year)
+
+\item $V(x-s)-V(x)=$ change in value caused by the event
+\end{itemize}
+
+\item Jumps allow for continuous time with discrete states
+
+\begin{itemize}
+\item Independent event arrival $\implies $ only one at a given time
+
+\item In discrete time, multiple events occur simultaneously \newline
+$\implies $ expectation gets messy
+\end{itemize}
+\end{itemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+%EndExpansion
+\frametitle{Solving the above models}
+
+\begin{itemize}
+\item If state is discrete, use discrete-state methods
+
+\begin{itemize}
+\item Remember that l.h.s. of Bellman is $\rho V(x)$, not $V\left( x\right) $
+
+\item Try to carry $V(x)$ out of objective
+
+\item Otherwise, might need large dampening
+\end{itemize}
+
+\item Continuous state - same methods as in discrete time
+
+\begin{itemize}
+\item Value iteration with polynomial approximation
+
+\item Projection using Bellman and FOC
+\end{itemize}
+\end{itemize}
+
+%TCIMACRO{\TeXButton{EndFrame}{\end{frame}}}%
+%BeginExpansion
+\end{frame}%
+%EndExpansion
+%TCIMACRO{\TeXButton{BeginFrame}{\begin{frame}}}%
+%BeginExpansion
+\begin{frame}%
+%EndExpansion
+\frametitle{Continuous \& stochastic state}
+
+\begin{center}
+{\small Based on lecture notes by Benjamin Moll of Princeton}
+\end{center}
+
+\begin{itemize}
+\item Discrete time = state follows a Markov chain process
+
+\begin{itemize}
+\item e.g. random walk (AR(1) with $\rho =1$):
+\begin{equation*}
+x_{t+1}=x_{t}+\varepsilon _{t},\varepsilon _{t}\sim N\left( 0,1\right)
+\end{equation*}
+\end{itemize}
+
+\item Cont. time: want $x\left( t\right) $ to be continuous in $t$, and
+random
+
+\item Standard Brownian motion (Wiener) process $W\left( t\right) $, $t\in
+\mathbb{R}^{+}$:
+
+\begin{itemize}
+\item $W\left( t+\Delta t\right) -W\left( t\right) =\left( \sqrt{\Delta t}%
+\right) \varepsilon $, $\varepsilon \sim N\left( 0,1\right) $
+
+\item $W\left( 0\right) =0$
+\end{itemize}
+
+\item Observations:
+
+\begin{itemize}
+\item $W\left( t\right) \sim N\left( 0,t\right) $
+
+\item $t\in \left\{ 0,1,2,...\right\} \Rightarrow W\left( t\right) $ is a
+random walk
+\end{itemize}
+\end{itemize}
+
+%TCIMACRO{\TeXButton{EndFrame}{\end{frame}}}%
+%BeginExpansion
+\end{frame}%
+%EndExpansion
+%TCIMACRO{\TeXButton{BeginFrame}{\begin{frame}}}%
+%BeginExpansion
+\begin{frame}%
+%EndExpansion
+\frametitle{General diffusion process}
+
+\begin{itemize}
+\item Introduce drift $\mu $ and variance $\sigma $:%
+\begin{equation*}
+x\left( t\right) =x\left( 0\right) +\mu t+\sigma W\left( t\right)
+\end{equation*}
+
+\begin{itemize}
+\item Differential form:
+\begin{equation*}
+dx=\mu dt+\sigma dW
+\end{equation*}
+
+\item From here on, we drop "$\left( t\right) "$ as per convention
+\end{itemize}
+
+\item Diffusion process:%
+\begin{equation*}
+dx=\mu \left( x\right) dt+\sigma \left( x\right) dW
+\end{equation*}
+\begin{equation*}
+x(t)= \int_{0}^{t}\mu\left( x\right)dt+\int_{0}^{t}\sigma \left( x\right) dW
+\end{equation*}
+
+\item Choice of $\mu \left( x\right) $ and $\sigma \left( x\right) $ can allow highly general continuous $x$ process:
+
+\begin{itemize}
+\item Stationary: $\mu \left( x\right) =\theta \left( \bar{x}-x\right) $
+(Ornstein-Uhlenbeck)
+
+\item Bounded, e.g. to $\left[ 0,1\right] $: $\sigma \left( x\right) =\sigma
+x\left( 1-x\right) $
+\end{itemize}
+\end{itemize}
+
+%TCIMACRO{\TeXButton{EndFrame}{\end{frame}}}%
+%BeginExpansion
+\end{frame}%
+%EndExpansion
+%TCIMACRO{\TeXButton{BeginFrame}{\begin{frame}}}%
+%BeginExpansion
+\begin{frame}%
+%EndExpansion
+\frametitle{Dynamic stochastic problem}
+
+\begin{itemize}
+\item State $x$ is now a diffusion:%
+\begin{equation*}
+\begin{array}{rl}
+\max_{u} & \mathbf{E}_{0}\int_{0}^{\infty }e^{-\rho t}\pi \left( x,u\right)
+dt \\
+\text{s.t.:} & dx=f\left( x,u\right) dt+\sigma \left( x,u\right) dW,\qquad
+x(0)=x_{0}%
+\end{array}%
+\end{equation*}
+
+\item HJB equation:%
+\begin{equation*}
+\rho V(x)=\max_{u}\pi \left( x,u\right) +V^{\prime }(x)f(x,u)+\frac{1}{2}%
+\sigma ^{2}\left( x,u\right) V^{\prime \prime }\left( x\right)
+\end{equation*}
+
+\begin{itemize}
+\item Reverts to deterministic case if $\sigma =0$
+\end{itemize}
+
+\item It is nice to have a stationary state process
+
+\item Modeling asset price $p$: $x=\ln p\Rightarrow p>0$
+\end{itemize}
+
+%TCIMACRO{\TeXButton{EndFrame}{\end{frame}}}%
+%BeginExpansion
+\end{frame}%
+
+\begin{frame}%
+%EndExpansion
+\frametitle{Theory behind HJB}
+
+\textbf{It\^{o}'s lemma}:
+
+\begin{itemize}
+\item $x$ is a diffusion: $dx=\mu \left( x\right) dt+\sigma \left( x\right)
+dW$
+
+\item $f\left( x\right) $ is twice continuously differentiable
+
+\item Then:%
+\begin{equation*}
+df\left( x\right) =\left[ \mu \left( x\right) f^{\prime }\left( x\right) +%
+\frac{1}{2}\sigma ^{2}\left( x\right) f^{\prime \prime }\left( x\right) %
+\right] dt+\sigma \left( x\right) f^{\prime }\left( x\right) dW
+\end{equation*}
+
+\item In HJB:
+
+\begin{itemize}
+\item $f\left( x\right) =V\left( x\right) $
+
+\item $dt$ term $\left[ ...\right] $ goes into HJB objective
+
+\item $dW$ integrates out (since $\mathbf{E}dW=0$)
+\end{itemize}
+\end{itemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+%EndExpansion
+\frametitle{Ito's lemma: Intuition}
+
+\begin{itemize}
+
+\item For $dt$ small, $(dW_t)^2=dt$ since $W_t\sim O(\sqrt{t})$
+\item So $(dx_t)^{2}=(\mu(x_t)dt+\sigma(x_t)dW_t)^2=\sigma^2(x_t)dt$
+\item Let $f(x,t)\in C^2$, then Taylor expansion gives
+
+\begin{equation*}
+df_t=\frac{\partial f(x_t,t)}{\partial x}dx_{t}+\frac{\partial f(x_t,t)}{\partial t}dt+\frac{1}{2}\frac{\partial^2 f(x_t,t)}{\partial x^2}(dx_t)^2
+\end{equation*}
+\begin{equation*}
+=\frac{\partial f(x_t,t)}{\partial x}\left(\mu(x_t)dt+\sigma(x_t)dW_t\right)+\frac{\partial f(x_t,t)}{\partial t}dt
+\end{equation*}
+\begin{equation*}
++\frac{1}{2}\frac{\partial^2 f(x_t,t)}{\partial x^2}\sigma^2(x_t)dt
+\end{equation*}
+\begin{equation*}
+=\left(\frac{\partial f(x_t,t)}{\partial x}\mu(x_t) +\frac{\partial f(x_t,t)}{\partial t}+\frac{1}{2}\frac{\partial^2 f(x_t,t)}{\partial x^2}\sigma^2(x_t)\right)dt
+\end{equation*}
+\begin{equation*}
++\frac{\partial f(x_t,t)}{\partial x}\sigma(x_t)dW_t
+\end{equation*}
+\item Recover above result in time-independent case
+
+
+\end{itemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+%EndExpansion
+\frametitle{HJB Equation: Intuition}
+
+\begin{itemize}
+
+\item Discrete-time Bellman over time period $h\rightarrow 0$:%
+\begin{equation*}
+V(x)=\max_{u}h\pi \left( x,u\right) +e^{-\rho h}E[V(x^{\prime})|x]
+\end{equation*}
+\item Taylor approx $e^{-\rho h}=\frac{1}{1+\rho h}$ and multiply
+\begin{equation*}
+(1+\rho h)V(x)=\max_{u}h(1+\rho h)\pi \left( x,u\right) +E[V(x^{\prime})|x]
+\end{equation*}
+\item Subtract $V$ and divide by $h$
+\begin{equation*}
+\rho V(x)=\max_{u}(1+\rho h)\pi \left( x,u\right) +\frac{1}{h}E[V(x^{\prime})-V(x)|x]
+\end{equation*}
+\item Take h to $0$
+\begin{equation*}
+\rho V(x)=\max_{u}\pi \left( x,u\right) +\frac{E[dV(x)]}{dt}
+\end{equation*}
+
+\end{itemize}
+
+
+\end{frame}%
+
+
+
+
+\begin{frame}%
+%EndExpansion
+\frametitle{HJB Equation}
+
+\begin{itemize}
+
+\item Diffusion Limit of $x$ and Ito's lemma for V give
+\begin{equation*}
+dV(x)=(V^{\prime}(x)f(x,u)+\frac{1}{2}\sigma^2(x,u)V^{\prime\prime}(x)) dt+V^{\prime}(x)\sigma(x,u)dW
+\end{equation*}
+\item $E[dW]=0$, giving
+\begin{equation*}
+\rho V(x)=\max_{u}\pi \left( x,u\right) +V^{\prime}(x)f(x,u)+\frac{1}{2}\sigma^2(x,u)V^{\prime\prime}(x)
+\end{equation*}
+% \item Multidimensional case, Poisson jumps follow similar derivation
+\item Optimal Policy is $u^*(x)$ solving FOC and Bellman equation
+\begin{equation*}
+\pi_u \left( x,u^*(x)\right) +V^{\prime}(x)f_u(x,u^*(x))+\sigma(x,u)\sigma_u(x,u^*(x))V^{\prime\prime}(x)
+\end{equation*}
+\begin{equation*}
+\rho V(x)=\pi \left( x,u^*(x)\right) +V^{\prime}(x)f(x,u^*(x))+\frac{1}{2}\sigma^2(x,u^*(x))V^{\prime\prime}(x)
+\end{equation*}
+
+\end{itemize}
+
+
+\end{frame}%
+
+\begin{frame}%
+%EndExpansion
+\frametitle{General: d-Dimensional Jump Diffusion}
+
+\begin{itemize}
+\item $dX_t=\mu(X_t,u_t,t)dt+\sigma(X_t,u_t,t)dW_t+\sum_{k=1}^{p}\lambda_k(X_t,u_t,t)dN_{k,t}$
+\begin{itemize}
+\item $W_t$ $m\times 1$ iid Brownian motions, $\sigma(X_t,u_t,t)$ $d\times m$ volatility
+\item $\{N_{k,t}\}_{k=1}^{p}$ independent Poisson, $\lambda_k(X_t,u_t,t)$ intensity
+\item Jumps are Markov $X_{t+}|X_t\sim f_k(X'|X,u,t)$
+\end{itemize}
+\item HJB equation takes form $\rho V(X,t)=$
+\begin{itemize}
+\item $\max_{u}\pi \left( x,u\right) +\partial_t V(X,t)+ \sum_{i=1}^{d}\mu_i(X,u,t)\frac{\partial}{\partial x_i}V(X,t)$
+\item $+\frac{1}{2}\sum_{i,j}(\sigma(X,u,t)\sigma(X,u,t)^{T})_{i,j}\frac{\partial^2}{\partial x_i\partial x_j}V(X,t)$
+\item $+\sum_{k=1}^{p}\lambda_k(X,u,t)(\int V(X^{+},t)f_k(X^{+}|X,u,t)dX^{+}-V(X,t))$
+\end{itemize}
+
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}%
+%EndExpansion
+\frametitle{Solving diffusion-based problems}
+
+\begin{itemize}
+\item Value iteration with approximation to $V\left( \cdot \right) $
+
+\item Projection methods
+
+\item Existence/uniqueness issues for nonlinear PDE: $2^{nd}$ derivative may not exist everywhere (kink in value function)
+\begin{itemize}
+\item $\to$ \emph{Viscosity} solution is one generating optimum
+\item Generalizes subgradient approach from convex optimization
+\item Ensure this by using \emph{upwind} variant of finite difference approach
+\item Idea: use forward FD when drift $>0$, backward when drift $<0$
+\end{itemize}
+
+\item See codes at Moll's webpage: {\small \newline
+}\url{https://benjaminmoll.com/codes/}
+
+\end{itemize}
+
+%TCIMACRO{\TeXButton{EndFrame}{\end{frame}}}%
+%BeginExpansion
+\end{frame}%
+%EndExpansion
+
+\end{document}
