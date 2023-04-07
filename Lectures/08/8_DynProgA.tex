@@ -1,0 +1,1183 @@
+%2multibyte Version: 5.50.0.2953 CodePage: 1252
+
+\documentclass[bigger,handout]{beamer}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{mathpazo}
+\usepackage{hyperref}
+\usepackage{multimedia}
+\usepackage{pgfpages}
+\usepackage{graphicx}
+
+\setcounter{MaxMatrixCols}{10}
+%TCIDATA{OutputFilter=LATEX.DLL}
+%TCIDATA{Version=5.50.0.2953}
+%TCIDATA{Codepage=1252}
+%TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
+%TCIDATA{BibliographyScheme=Manual}
+%TCIDATA{Created=Monday, October 27, 2008 15:56:24}
+%TCIDATA{LastRevised=Wednesday, April 12, 2017 10:17:24}
+%TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
+%TCIDATA{<META NAME="DocumentShell" CONTENT="Other Documents\SW\Slides - Beamer">}
+%TCIDATA{Language=American English}
+%TCIDATA{CSTFile=beamer.cst}
+
+\newenvironment{stepenumerate}{\begin{enumerate}[<+->]}{\end{enumerate}}
+\newenvironment{stepitemize}{\begin{itemize}[<+->]}{\end{itemize} }
+\newenvironment{stepenumeratewithalert}{\begin{enumerate}[<+-| alert@+>]}{\end{enumerate}}
+\newenvironment{stepitemizewithalert}{\begin{itemize}[<+-| alert@+>]}{\end{itemize} }
+\usetheme{Madrid}
+\usecolortheme{beaver}
+\usefonttheme{professionalfonts}
+\input{tcilatex}
+\setbeamertemplate{navigation symbols}{}
+\begin{document}
+
+\title[47-809: Dyn.Prog.]{Dynamic Programming - I}
+\subtitle{Judd Chapter 12}
+\author[David Childers]{David Childers (thanks to Y. Kryukov, K. Judd, and U. Doraszelski)}
+\institute[CMU]{CMU, Tepper School of Business}
+\date[Apr 10-12]{April 10 - 12, 2023}
+\maketitle
+
+
+
+\begin{frame}%
+
+\frametitle{Agenda}
+
+\begin{itemize}
+\item Dynamic problems features:
+
+\begin{itemize}
+\item Time: Discrete ($\sum_{t=0}^{T}\beta ^{t}$) or continuous ($%
+\int_{0}^{T}e^{-\rho t}$)
+
+\item Time horizon: finite ($T\in \mathbb{N}$) or infinite ($T=\infty $)
+
+\item State: discrete or continuous
+
+\item State transition: deterministic or stochastic
+\end{itemize}
+
+\item DP gives us Bellman eq's for any combination of these
+\end{itemize}
+
+\begin{enumerate}
+\item now: \textbf{Theory: Finite and infinite horizon, with cont. state}
+
+\item \textbf{Computation with discrete states}
+
+\begin{enumerate}
+\item \textbf{Value \& Policy iteration}
+
+\item \textbf{Stochastic vs. deterministic transitions}
+\end{enumerate}
+
+\item Computation with continuous state
+
+\begin{enumerate}
+\item Value function iteration
+
+\item Projection
+\end{enumerate}
+
+\item Continuous time
+\end{enumerate}
+
+
+
+\end{frame}%
+
+
+
+\begin{frame}%
+
+\frametitle{Continuous vs. discrete time}
+
+\begin{itemize}
+\item Assume continuous state, deterministic transitions
+
+\item A problem in continuous time:%
+\begin{equation*}
+\begin{array}{rc}
+\max  & \int_{0}^{\infty }e^{-\rho t}\pi (x\left( t\right) ,u\left( t\right)
+)dt \\
+\text{subject to:} & \dot{x}\equiv x^{\prime }(t)=f(x(t),u(t)) \\
+& x(0)=\bar{x}_{0}%
+\end{array}%
+\end{equation*}
+
+\begin{itemize}
+\item $u=$ control / policy, $x=$ state
+\end{itemize}
+
+\item A problem in discrete time (today):%
+\begin{equation*}
+\begin{array}{rc}
+\max_{c} & \sum_{t=0}^{\infty }\beta ^{t}\pi (x_{t},u_{t}) \\
+\text{subject to:} & f\{x_{t},x_{t+1},u_{t}\}=0 \\
+& x_{0}=\bar{x}_{0}%
+\end{array}%
+\end{equation*}
+
+\begin{itemize}
+\item Different problems with different solutions!
+\end{itemize}
+\end{itemize}
+
+
+
+\end{frame}%
+
+
+
+\begin{frame}%
+
+\frametitle{Deriving Bellman's eq.: finite horizon }
+
+\begin{equation*}
+\begin{array}{rc}
+\max_{u,x\in \mathbb{R}^{T}} & \sum_{t=0}^{T}\beta ^{t}\pi
+(x_{t},u_{t})+\beta ^{T+1}W(x_{T+1}) \\
+\text{subject to:} & f\{x_{t},x_{t+1},u_{t}\}=0\ \forall t,\qquad x_{0}=\bar{x}_{0}%
+\end{array}%
+\end{equation*}
+
+\begin{stepitemize}
+\item Can re-write objective as%
+\begin{equation*}
+\max_{\substack{ u_{0},..,u_{T-1}  \\ x_{1},..,x_{T}}}\left\{
+\sum\nolimits_{t=0}^{T-1}\beta ^{t}\pi (x_{t},u_{t})+\beta
+^{T}\max_{u_{T},x_{T+1}}\left[
+\begin{array}{c}
+\pi (x_{T},u_{T}) \\
++\beta W(x_{T+1})%
+\end{array}%
+\right] \right\}
+\end{equation*}
+
+\item Label the last term as the \emph{Value function} $V(x_{T},T)$:%
+\begin{eqnarray*}
+V(x_{T},T) &:&=\max_{u_{T},x_{T+1}}\pi (x_{T},u_{T})+\beta W(x_{T+1}) \\
+\text{s.t.}\text{: } &&f\{x_{T},x_{T+1},u_{T}\}=0\text{, }
+\end{eqnarray*}%
+$x_{T}$ is a parameter here (just like $x_{0}$ in the full model)
+\end{stepitemize}
+
+
+
+\end{frame}%
+
+
+
+\begin{frame}%
+
+\frametitle{Next transformation}
+
+Using $V(\cdot ,T)$, rewrite the objective further:%
+\begin{equation*}
+\max_{u_{0},..,u_{T-2}}\left\{ \sum\nolimits_{t=0}^{T-2}\beta ^{t}\pi
+(x_{t},u_{t})+\beta ^{T-1}\max_{u_{T-1},x_{T}}\left[
+\begin{array}{c}
+\pi (x_{T-1},u_{T-1}) \\
++\beta V(x_{T},T)%
+\end{array}%
+\right] \right\}
+\end{equation*}%
+and again define
+\begin{eqnarray*}
+V(x_{T-1},T-1) &:&=\max_{u_{T-1},x_{T}}\pi (x_{T-1},u_{T-1})+\beta V(x_{T},T)
+\\
+\text{s.t.} &\text{:}&f\{x_{T-1},x_{T},u_{T-1}\}=0
+\end{eqnarray*}
+
+State variable $x_{T-1}$ is a \emph{sufficient statistic} \newline
+for whatever happened before period $T-1$.
+
+
+
+\end{frame}%
+
+
+
+\begin{frame}%
+
+\frametitle{Bellman's principle -- finite horizon}
+
+Original problem:%
+\begin{equation*}
+\max_{u,x\in \mathbb{R}^{T}}\sum_{t=0}^{T}\beta ^{t}\pi (x_{t},u_{t})+\beta
+^{T+1}W(x_{T+1})
+\end{equation*}%
+is equivalent to\emph{\ Bellman equations} for $t=1,...,T$:
+\begin{gather}
+V(x_{t},t)=\max_{u_{t},x_{t+1}}\pi (x_{t},u_{t})+\beta V(x_{t+1},t+1)
+\tag{*} \\
+\text{s.t. }f\{x_{t},x_{t+1},u_{t}\}=0,\qquad  \notag
+\end{gather}
+
+\begin{stepitemize}
+\item $V(\cdot ,\cdot )$ = (max of) net present value of remaining payoffs:
+\begin{equation*}
+V(x_{s},s)=\max\limits_{u,x}\sum_{t=s}^{T}\beta ^{t-s}\pi
+(x_{t},u_{t})+\beta ^{T+1-s}W(x_{T+1})
+\end{equation*}
+\end{stepitemize}
+
+
+
+\end{frame}%
+
+
+
+\begin{frame}%
+
+\frametitle{Bellman principle -- interpretation}
+
+\begin{itemize}
+\item Instead of solving for $\left(
+u_{0},x_{1},u_{1},...,u_{T},x_{T+1}\right) $,
+
+\item Solve a sequence of problems for $t=T,T-1,...,1$\
+
+\begin{itemize}
+\item Each problem has an arbitrary parameter $x_{t}$
+
+\item Solution (\emph{Policy function}): $U_{t}\left( x_{t},t\right) $
+
+\item Maximized objective (\emph{Value function}): $V(x_{t},t)$
+\end{itemize}
+
+\item Can compute time path for the original problem:
+
+\begin{itemize}
+\item $x_{0}$ known, $u_{0}=U\left( x_{0},0\right) $,
+
+\item $x_{1}$ solves$\ f\{x_{0},x_{1},u_{0}\}=0$, $u_{1}=U\left(
+x_{1},1\right) $, and so on
+\end{itemize}
+
+\item Or we can analyze policy and value functions
+\end{itemize}
+
+
+
+\end{frame}%
+
+
+
+\begin{frame}%
+
+\frametitle{Infinite horizon model}
+
+\begin{stepitemize}
+\item Explicit model:%
+\begin{eqnarray*}
+V(x_{0},0) &=&\max_{u_{0},x_{1},u_{1},...}\sum\nolimits_{t=0}^{\infty }\beta
+^{t}\pi (x_{t},u_{t}) \\
+\text{s.t.} &\text{:}&f\{x_{t},x_{t+1},u_{t}\}=0\ \forall t,x_{0}=\bar{x}_{0}
+\end{eqnarray*}
+
+\item Isolate the first term in the objective:%
+\begin{equation*}
+\max_{u_{0},x_{1}}\left\{ \pi (x_{0},u_{0})+\beta
+\max_{u_{1},x_{2},u_{2},...}\sum\nolimits_{t=1}^{\infty }\beta ^{t-1}\pi
+(x_{t},u_{t})\right\}
+\end{equation*}
+
+\item Define the value function:%
+\begin{equation*}
+V(x_{1},1)=\max_{u_{1},x_{2},u_{2},...}\sum\nolimits_{t=1}^{\infty }\beta
+^{t-1}\pi (x_{t},u_{t})
+\end{equation*}
+
+\item Compare $V(x_{1},1)$ to explicit model (Hint: define $\tau =t-1$)
+\end{stepitemize}
+
+
+
+\end{frame}%
+
+
+
+\begin{frame}%
+
+\frametitle{Bellman principle -- infinite horizon}
+
+\begin{stepitemize}
+\item Time does not affect Value function, only the state does
+
+\item \textbf{Bellman} equations for infinite time horizon:
+\begin{eqnarray}
+V(x) &=&\max_{u,x^{+}\in \mathbb{R}}\pi (x,u)+\beta V(x^{+})
+\TCItag{\QTR{bf}{**}} \\
+\text{s.t.} &\text{:}&f\{x,x^{+},u\}=0,  \notag
+\end{eqnarray}%
+$x$ = state in current period, $x^{+}$ = in the next period
+
+\item Unlike finite time, there is only one value function $V(x)$
+
+\item \textbf{Policy function} (decision rule):\textbf{\ }%
+\begin{equation*}
+U(x)=\arg \max ...
+\end{equation*}
+\end{stepitemize}
+
+
+
+\end{frame}%
+
+
+
+\begin{frame}%
+
+\frametitle{Richard Bellman, 1962}
+
+
+\scalebox{0.5}{\includegraphics{bellman_comp.png}}
+
+
+\end{frame}%
+
+
+
+\begin{frame}%
+
+\frametitle{Practical solution to Bellman}
+
+\begin{itemize}
+\item Policy function is defined by:\textbf{\ }%
+\begin{equation*}
+U(x)=\arg \max_{u}\pi (x,u)+\beta V(x^{+}\left( x,u\right) )
+\end{equation*}
+
+\begin{itemize}
+\item Note; $x^{+}\left( u,x\right) $ solves the constraint for $x^{+}$
+\end{itemize}
+
+\item Take FOC (w.r.t. $u$):%
+\begin{equation}
+\pi _{u}(x,U(x))+\beta V^{\prime }(x^{+}(x,U(x)))x_{u}^{+}(x,U(x))=0
+\tag{***}
+\end{equation}
+
+\item If $U(x)$ solves (***), we can replace (**) with:%
+\begin{equation}
+V(x)=\pi (x,U(x))+\beta V(x^{+}\left( x,U(x)\right) )  \tag{****}
+\end{equation}
+
+\item (***)-(****) are a system of two functional equations,\newline
+which we solve for two unknown functions: $V\left( x\right) $ and $U\left(
+x\right) $
+\end{itemize}
+
+
+
+\end{frame}%
+
+
+
+\begin{frame}%
+
+\frametitle{More on Bellman's solution}
+
+\begin{itemize}
+\item $V^{\prime }(x^{+}(x,U(x)))$ in (***) nests unknown functions
+
+\begin{itemize}
+\item To avoid it, use Envelope theorem for (**):%
+\begin{gather*}
+V^{\prime }(x)=\pi _{x}(x,U(x))+\beta V^{\prime }(x^{+}\left( x,U(x)\right)
+)x_{x}^{+}\left( x,U(x)\right) \\
+\Rightarrow \beta V^{\prime }(x^{+}\left( x,U(x)\right) )=\left[ V^{\prime
+}(x)-\pi _{x}(x,U(x))\right] /x_{x}^{+}\left( x,U(x)\right)
+\end{gather*}
+
+\item In many models, $x_{x}^{+}=1$
+\end{itemize}
+
+\item Explicit problem solves for infinite sequence $u_{1},u_{0},...$;%
+\newline
+DP solves for functions $V(x)$ and $U\left( x\right) $
+
+\item If we want to construct timepath of $u_{t}$'s:
+
+\begin{enumerate}
+\item $u_{0}=U\left( x_{0}\right) $, $x_{1}$ solves $f\{x_{0},x_{1},u_{0}%
+\}=0 $,
+
+\item $u_{1}=U\left( x_{1}\right) ,$ and so on
+\end{enumerate}
+\end{itemize}
+
+
+
+\end{frame}%
+
+
+
+\begin{frame}%
+
+\frametitle{Dynamic Programming theory}
+
+\begin{itemize}
+\item Can often work with bounded support of $V\left( \cdot \right) $:
+
+\begin{itemize}
+\item Neigborhood of the steady state $x^{\ast }$
+
+\item Time path: $x\in \left[ x_{0},x^{\ast }\right] $
+
+\item or just $x\in \left[ -10^{6},+10^{6}\right] $
+\end{itemize}
+
+\item Functions of such $x$ are a vector space; \newline
+defining a norm makes it a metric space.
+
+\item Maximization problem in (**) is an operator on that space:%
+\begin{equation*}
+\left( T\left( V\right) \right) \left( x\right) \equiv \max_{u,x^{+}\in
+\mathbb{R}}\pi (x,u)+\beta V(x^{+})
+\end{equation*}
+
+\item Bellman equation is thus a fixed-point problem:%
+\begin{equation*}
+V=T\left( V\right)
+\end{equation*}
+
+\item If $T$ is a contraction, a unique solution exists
+\end{itemize}
+
+
+
+\end{frame}%
+
+
+
+\begin{frame}%
+
+\frametitle{DP Theory: Contraction mapping}
+
+Contraction mapping: $T$ such that for some $\beta \in (0,1)$:
+\begin{equation*}
+\left\Vert T(V)-T(W)\right\Vert \leq \beta \left\Vert V-W\right\Vert ,\qquad
+\forall V,W
+\end{equation*}
+
+\textbf{Blackwell's sufficient conditions} for contraction:
+
+\begin{enumerate}
+\item $B(X)$ is a set of bounded functions $V:X\subseteq \mathbb{R}%
+^{n}\rightarrow \mathbb{R}$
+
+\item \emph{Monotonicity}: $V,W\in B(X)$ such that $V(x)\leq W(x)$ $\forall
+x $ $\Rightarrow $%
+\begin{equation*}
+(T\left( V\right) )(x)\leq (T\left( W\right) )(x),\forall x\in X
+\end{equation*}
+
+\item \emph{Discounting}: there exists $\beta \in (0,1)$ such that
+\begin{equation*}
+(T(V+a))(x)\leq (T\left( V\right) )(x)+\beta a
+\end{equation*}%
+$\forall V\in B(X)$, $\forall a\geq 0$, $\forall x$
+\end{enumerate}
+
+Bellman operator is a contraction if:
+
+\begin{stepitemize}
+\item $x\in X$ -- compact set (e.g. neighborhood of the steady state)
+
+\item $\pi $ is bounded \& $\beta <1$ (typically satisfied in Economics)
+\end{stepitemize}
+
+
+
+\end{frame}%
+
+
+
+\begin{frame}%
+
+\frametitle{Extension A: stochastic transition}
+
+\begin{itemize}
+\item Explicit model (infinite time):%
+\begin{eqnarray*}
+&&\max_{u}\mathbf{E}_{x}\left[ \sum\nolimits_{t=0}^{\infty }\beta ^{t}\pi
+(x_{t},u_{t})\right] \\
+\text{where} &\text{: }&x_{t+1}\sim F\left( \cdot |x_{t},u_{t}\right)\ \forall t ,x_{0}=%
+\bar{x}_{0}
+\end{eqnarray*}
+
+\begin{itemize}
+\item $x_{t+1}$ is a Markov process conditioned on $u_{t}$
+\end{itemize}
+
+\item Bellman equation:%
+\begin{equation*}
+V(x)=\max_{u,x^{+}\in \mathbb{R}}\pi (x,u)+\beta \mathbf{E}_{x^{+}}\left[
+V(x^{+})|x,u\right] ,
+\end{equation*}%
+\begin{equation*}
+\mathbf{E}_{x^{+}}\left[ V(x^{+})|x,u\right] =\int_{X}V\left( x^{+}\right)
+dF\left( x^{+}|x,u\right)
+\end{equation*}
+
+\item FOC:
+\begin{equation*}
+\pi _{u}(x,U(x))+\beta \int_{X}V\left( x^{+}\right) dF_{u}\left(
+x^{+}|x,U(x)\right) =0
+\end{equation*}
+\end{itemize}
+
+
+
+\end{frame}%
+
+
+
+\begin{frame}%
+
+\frametitle{Extension B: stochastic payoff}
+
+\begin{itemize}
+\item Explicit model (determinstic state transitions):%
+\begin{eqnarray*}
+&&\max_{u}\mathbf{E}_{\varepsilon }\left[ \sum\nolimits_{t=0}^{\infty }\beta
+^{t}\pi (x_{t},u_{t},\varepsilon _{t})\right] \\
+\text{s.t.} &\text{:}&f\{x_{t},x_{t+1},u_{t}\}=0\ \forall t \\
+\varepsilon _{t} &\sim &G\left( \cdot \right) \text{, i.i.d.}
+\end{eqnarray*}
+
+\begin{itemize}
+\item Agent learns $\varepsilon _{t}$ only in period $t$ (but not before)
+\end{itemize}
+
+\item Full-information Bellman eq.:%
+\begin{eqnarray*}
+\tilde{V}\left( x,\varepsilon \right) &=&\max_{u}\pi (x,u,\varepsilon
+)+\beta V\left( x^{+}\left( x,u\right) \right) \\
+\tilde{U}\left( x,\varepsilon \right) &=&\arg \max ...
+\end{eqnarray*}
+
+\item Integrated Bellman:%
+\begin{equation*}
+V\left( x\right) =\mathbf{E}_{\varepsilon }\tilde{V}\left( x,\varepsilon
+\right)
+\end{equation*}
+
+\begin{itemize}
+\item "$U\left( x\right) $" is a distribution, driven by $\varepsilon $
+\end{itemize}
+\end{itemize}
+
+
+
+\end{frame}%
+
+
+
+\begin{frame}%
+
+\frametitle{Stochastic payoff example}
+
+\begin{itemize}
+\item Stochastic payoff framework is often used \newline
+to model discrete choice:
+
+\begin{itemize}
+\item $u\in \left\{ u_{1},...,u_{m}\right\} $, e.g. exit/enter, or
+work/school/unempl.
+
+\item $\varepsilon _{t}=\left\{ \varepsilon _{t1},...,\varepsilon
+_{tm}\right\} $, $\varepsilon _{tj}\sim$ i.i.d. Type I Extreme Value,%
+\newline
+multiplied by $\sigma $ (the variance parameter)
+
+\item Choice-specific shocks: $\pi (x,u_{j},\varepsilon )=\pi
+_{j}(x)+\varepsilon _{j}$;
+
+\item let $\delta _{j}=\pi _{j}(x)+\beta V\left( x^{+}\left( x,u_{j}\right)
+\right) $
+\end{itemize}
+
+\item Then we have closed-form expressions:%
+\begin{equation*}
+V\left( x\right) =\sigma \log \left\{ \tsum\nolimits_{j=1}^{m}\exp \left(
+\delta _{j}/\sigma \right) \right\}
+\end{equation*}%
+\begin{equation*}
+\Pr \left\{ U\left( x\right) =u_{j}\right\} =\frac{\exp \left( \delta
+_{j}/\sigma \right) }{\tsum\nolimits_{l=1}^{m}\exp \left( \delta _{l}/\sigma
+\right) }
+\end{equation*}
+\end{itemize}
+
+
+
+\end{frame}%
+
+
+
+\begin{frame}%
+
+\frametitle{Numeric solution: discrete states}
+
+\begin{itemize}
+\item Discrete states are easier to understand
+
+\begin{itemize}
+\item Continuous states (next class) might be faster to solve
+\end{itemize}
+
+\item States $X=\{x_{i}\}_{i=1}^{n}$ - a vector of possible values
+
+\begin{itemize}
+\item Value function becomes a vector: $V\left( \cdot \right) =\left\{
+V_{i}=V\left( x_{i}\right) \right\} _{i=1}^{n}$
+\end{itemize}
+
+\item Stochastic transition -- first-order Markov process:
+
+\begin{itemize}
+\item Let current state be $x_{i}$ and control be $u$
+
+\item Then, $q_{ij}(u)$ = probability of next-period state being $x_{j}$
+
+\item It is common to limit transitions to 2-3 neighboring states
+\end{itemize}
+
+\item Deterministic transitions will be covered separately
+
+\begin{itemize}
+\item $q_{ij}(u)\in \left\{ 0,1\right\} $, so we cannot differentiate it
+
+\item Policy $u$ becomes discrete as well
+\end{itemize}
+\end{itemize}
+
+
+
+\end{frame}%
+
+
+
+\begin{frame}%
+
+\frametitle{Finite horizon}
+
+\begin{stepitemize}
+\item Finite-horizon case ($t=0,..,T$):
+\begin{equation*}
+V_{i}^{t}=\max_{u}\pi (x_{i},u,t)+\beta
+\sum\nolimits_{j=1}^{n}q_{ij}^{t}(u)V_{j}^{t+1}
+\end{equation*}
+
+\begin{itemize}
+\item with terminal condition $V_{i}^{T+1}\equiv W(x_{i})$
+\end{itemize}
+
+\item Recursive system of $n\left( T+1\right) $ equations in $n\left(
+T+1\right) $ unknowns:
+
+\begin{stepitemize}
+\item Have $V_{i}^{T+1}\equiv W(x_{i})$, maximization problem gives $\left\{
+V_{i}^{T}\right\} _{i=1}^{n}$
+
+\item Continue using $V_{i}^{t+1}$'s to compute $V_{i}^{t}$'s
+
+\item Stop when $t=0$ is reached
+\end{stepitemize}
+\end{stepitemize}
+
+
+
+\end{frame}%
+
+
+
+\begin{frame}%
+
+\frametitle{Discrete states + infinite time horizon}
+
+\begin{itemize}
+\item No more time-dependence: $V_{i}=V(x_{i})$, $i=1,\ldots ,n$.
+
+\item The Bellman equation is:
+\begin{equation}
+V_{i}=\max_{u}\pi (x_{i},u)+\beta \sum\nolimits_{j=1}^{n}q_{ij}(u)V_{j}.
+\label{eq:BellDiscState}
+\end{equation}%
+\begin{equation*}
+U_{i}^{\ast }=\arg \max ...
+\end{equation*}
+
+\begin{itemize}
+\item Can have constraints on $u$ (e.g. $0\leq c\leq k+f\left( k\right) $)
+\end{itemize}
+
+\item System of $2n$ nonlinear equations in $2n$ unknowns:%
+\begin{eqnarray*}
+V_{i} &=&\pi (x_{i},U_{i}^{\ast })+\beta
+\sum\nolimits_{j=1}^{n}q_{ij}(U_{i}^{\ast })V_{j} \\
+0 &=&\pi _{u}(x_{i},U_{i}^{\ast })+\beta
+\sum\nolimits_{j=1}^{n}q_{ij}^{\prime }(U_{i}^{\ast })V_{j}
+\end{eqnarray*}
+
+\item Can solve using any method, but the most common way \newline
+is fixed point iteration (next slide)
+\end{itemize}
+
+
+
+\end{frame}%
+
+
+
+\begin{frame}%
+
+\frametitle{Value function iteration}
+
+\begin{stepitemize}
+\item Define the operator $T$ pointwise by
+\begin{equation*}
+(TV)_{i}=\max_{u}\pi (x_{i},u)+\beta
+\sum\nolimits_{j=1}^{n}q_{ij}(u)V_{j},\quad i=1,\ldots ,n.
+\end{equation*}
+
+\begin{stepitemize}
+\item Initialization: Choose initial guess $V^{0}$ and stopping criterion $%
+\epsilon $.
+
+\item Step 1: Compute $V^{k+1}=TV^{k}$.
+
+\item Step 2: If $||V^{k+1}-V^{k}||<\epsilon $, stop; otherwise, go to step
+1.
+\end{stepitemize}
+
+\item The sequence $\left\{ V^{k}\right\} _{k=0}^{\infty }$ converges
+linearly at rate $\beta $ to $V^{\ast }$ and$:$%
+\begin{equation*}
+||V^{k}-V^{\ast }||\leq \frac{||V^{k+1}-V^{k}||}{1-\beta }.
+\end{equation*}
+
+\item To ensure $||V^{k+1}-V^{\ast }||<\epsilon $, stop if $%
+||V^{k+1}-V^{k}||\leq \epsilon (1-\beta )$.
+
+\item Maximization is the slowest part.
+
+\begin{itemize}
+\item Good $V^{0}$: monotonicity, concavity as in the solution
+
+\item Good guess for $u_{i}$: solution from previous iteration
+\end{itemize}
+\end{stepitemize}
+
+
+
+\end{frame}%
+
+
+
+\begin{frame}%
+
+\frametitle{Policy function iteration -- idea}
+
+\begin{stepitemize}
+\item Let $U=\left\{ U_{i}\equiv U(x_{i})\right\} _{i=1}^{n}$ be a guess of
+the policy function
+
+\item Value iteration follows chosen policy for one period
+
+\item Even if $U$ is close to optimal at each iteration, \newline
+it can take many iterations to compute the optimal $V$. \bigskip
+
+\item Once $U$ is computed, update of $V$ is linear
+
+\item Define transition matrix $Q\left( U\right) :\left[ Q\left( U\right) %
+\right] _{ij}=q_{ij}(U_{i})$,\newline
+and payoff vector $\Pi \left( U\right) :\left[ \Pi \left( U\right) \right]
+_{i}=\pi (x_{i},U_{i})$
+
+\item Following policy $U$ indefinitely leads to value f-n $V^{U}$ \newline
+that solves a system of linear equations:
+\begin{eqnarray}
+V^{U} &=&\Pi \left( U\right) +\beta Q\left( U\right) V^{U}  \label{eq:SLE} \\
+V^{U} &=&\left( I-\beta Q\left( U\right) \right) ^{-1}\Pi \left( U\right) .
+\notag
+\end{eqnarray}
+\end{stepitemize}
+
+
+
+\end{frame}%
+
+
+
+\begin{frame}%
+
+\frametitle{Policy function iteration -- implementation}
+
+\begin{itemize}
+\item Initialization: Choose initial guess $V^{0}$ and stopping criterion $%
+\epsilon $. \newline
+(Or: Choose $U^{0}$ instead of $V^{0}$ and go to step 2.)
+\end{itemize}
+
+\begin{enumerate}
+\item Compute $U^{k+1}$ by solving (\ref{eq:BellDiscState}) with $V^{k}$ in
+r.h.s.
+
+\item Plug $U^{k+1}$ into (\ref{eq:SLE}), solve for $V^{k+1}$.
+
+\item If $||V^{k+1}-V^{k}||<\epsilon $, stop; otherwise, go to step 1.
+\end{enumerate}
+
+\begin{itemize}
+\item Setting up (\ref{eq:SLE}) for Step 2 can be a lot of code
+
+\item (\ref{eq:SLE}) computes the value of following policy $U^{k+1}$
+indefinitely
+
+\item Modified policy iteration: follow $U^{k+1}$ for $m$ periods:
+
+\begin{itemize}
+\item 2.a: Set $W^{0}=V^{k}$.
+
+\item 2.b: Compute $W^{j+1}=\pi \left( U^{k+1}\right) +\beta Q\left(
+U^{k+1}\right) W^{j}$ \newline
+$\left. \text{ }\right. \left. \text{ }\right. \left. \text{ }\right. \left.
+\text{ }\right. $for $j=0,\ldots ,m-1$
+
+\item 2.c: Set $V^{k+1}=W^{m}$.
+\end{itemize}
+\end{itemize}
+
+
+
+\end{frame}%
+
+
+
+\begin{frame}%
+
+\frametitle{Extension: deterministic state transition}
+
+\begin{itemize}
+\item Formally, $q_{ij}\left( u\right) \in \left\{ 0,1\right\} $
+
+\begin{itemize}
+\item Not differentiable $\Rightarrow $ no more FOC
+
+\item Instead, we use deterministic l.o.m: $x^{+}=f\left( x_{i},u\right) $
+\end{itemize}
+
+\item Practically, we have to have $x^{+}\in X=\{x_{i}\}_{i=1}^{n}$,\newline
+so $u$ is limited to values that ensure this
+
+\begin{itemize}
+\item If $x=x_{i}$, then for any $x^{+}=x_{j}$, \newline
+we have $u_{ij}=f^{-1}\left( x_{i},x_{j}\right) $
+
+\item This lets us define to $\pi _{ij}\equiv \pi \left( x_{i},u_{ij}\right)
+$
+\end{itemize}
+
+\item Fixed point methods iterate on:%
+\begin{eqnarray*}
+V_{i}^{k+1} &=&\max_{j}\pi _{ij}+\beta V_{j}^{k} \\
+U_{i} &=&\arg \max ...
+\end{eqnarray*}
+
+\begin{itemize}
+\item Very simple to implement, but there is a cost
+\end{itemize}
+\end{itemize}
+
+
+
+\end{frame}%
+
+
+
+\begin{frame}%
+
+\frametitle{Problems with deterministic state transition}
+
+\begin{itemize}
+\item Sawtooth policy function \& waves in value function
+
+\begin{itemize}
+\item Discrete $u$ creates errors in $V$, which accumulate \newline
+until a large correction
+\end{itemize}
+
+\item Problems with convergence, or lack of solution altogether
+
+\begin{itemize}
+\item You are playing a game against your future self, \newline
+and restrict this game to pure strategies.
+
+\item Use dampening to try get $V$ to converge\bigskip
+\end{itemize}
+
+\item If you suspect sawtooth pattern or discretization effects:
+
+\begin{itemize}
+\item Switch to continuous state (next topic)
+
+\item Try changing number of states, see if shape of policy function
+changes: Finer grid should lead to smaller teeth.
+\end{itemize}
+\end{itemize}
+
+
+
+\end{frame}%
+
+
+
+\begin{frame}%
+
+\frametitle{Example - optimal growth}
+
+\begin{stepitemize}
+\item Discrete time:
+\begin{equation*}
+\begin{array}{rc}
+\max_{\left\{ c_{t}\right\} } & \sum_{t=0}^{\infty }\beta ^{t}u\left(
+c_{t}\right) \\
+\text{subject to:} & k_{t+1}-k_{t}=f\left( k_{t}\right) -c_{t}%
+\end{array}%
+\end{equation*}
+
+\item ... and state: $k\in K=\{k_{1},k_{2},\ldots ,k_{n}\}$
+
+\item Constraint implies that: $c_{t}=k_{t}+f\left( k_{t}\right) -k_{t+1}$,
+so%
+\begin{equation*}
+\max\nolimits_{\left\{ k_{t}\right\} }\sum\nolimits_{t=0}^{\infty }\beta
+^{t}u\left( k_{t}+f\left( k_{t}\right) -k_{t+1}\right)
+\end{equation*}
+
+\begin{stepitemize}
+\item I.e. we limit $c\left( k\right) $ to a discrete set of values
+\end{stepitemize}
+
+\item Formulate Bellman equation:%
+\begin{equation*}
+V(k)=\max_{k^{+}\in K}u(k+f(k)-k^{+})+\beta V(k^{+})
+\end{equation*}
+\end{stepitemize}
+
+
+
+\end{frame}%
+
+
+
+\begin{frame}%
+
+\frametitle{Example - value iteration}
+
+\begin{itemize}
+\item Index states by $i=1,...,n$
+
+\item Our simplification implies deterministic state transition: $q_{ij}\in
+\left\{ 0,1\right\} $
+
+\begin{itemize}
+\item This indeed simplifies math \& coding
+
+\item But can lead to unreasonable solutions
+\end{itemize}
+
+\item Start with a guess $\left\{ V_{i}^{0}\right\} _{i=1}^{n}$
+
+\item Step 1: for each $i$, solve:%
+\begin{equation}
+V_{i}^{k+1}=\max_{j}u(k_{i}+f(k_{i})-k_{j})+\beta V_{j}^{k}  \label{eq:ExGJ}
+\end{equation}
+
+\item Step 2: check if $\max_{i}\left\vert V_{i}^{k}-V_{i}^{k+1}\right\vert
+<\varepsilon $; stop if yes.
+\end{itemize}
+
+
+
+\end{frame}%
+
+
+
+\begin{frame}%
+
+\frametitle{Example - other methods \& extension}
+
+\begin{itemize}
+\item \textbf{Modified policy iteration}
+
+\begin{itemize}
+\item Step 1: same; save $j_{i}=\arg \max_{j}...$
+
+\item Step 2a: Set $W_{i}^{0}=V_{i}^{k},\qquad i=1,...,n$
+
+\item Step 2b: Compute $W_{i}^{\tau +1}=u(k_{i}+f(k_{i})-k_{j_{i}})+\beta
+W_{j_{i}}^{\tau }$, \newline
+repeat for $\tau =0,\ldots ,n$
+
+\item Step 2c: Set $V_{i}^{k+1}=W_{i}^{n+1},\qquad i=1,...,n$
+\end{itemize}
+
+\item \textbf{Gauss-Seidel}: use $V_{j}^{k+1}$ in (\ref{eq:ExGJ}) whenever
+available
+
+\item Can use dampening or acceleration\medskip
+
+\item \textbf{Extension}: restoring continuity via stochastic transition
+
+\begin{itemize}
+\item We want $c_{i}=c\left( k_{i}\right) \in R_{+}$. But then, $k^{+}\left(
+k_{i}\right) $ might not be on the grid
+
+\item $\Rightarrow $ Modify model: $q_{ij}\left( c_{i}\right) $ randomizes
+between \newline
+grid points around $k^{+}\left( k_{i}\right) $, to form approximation to $%
+V\left( k^{+}\right) $
+\end{itemize}
+\end{itemize}
+
+
+
+\end{frame}%
+
+
+
+\begin{frame}%
+
+\frametitle{Note on Gaussian methods}
+
+\begin{stepitemize}
+\item Value function iteration is \textbf{Pre}-Gauss-Jacobi iteration:
+\begin{equation*}
+V_{i}^{k+1}=\max_{u\in D(x_{i})}\pi (x_{i},u)+\beta
+\sum\nolimits_{j=1}^{n}q_{ij}(u)V_{j}^{k},\quad i=1,\ldots ,n.
+\end{equation*}%
+$V_{i}^{k}$ (old value) appears in r.h.s.
+
+\item True Gauss-Jacobi -- solve for $V_{i}$:
+\begin{equation*}
+V_{i}^{k+1}=\max_{u\in D(x_{i})}\frac{\pi (x_{i},u)+\beta \sum_{j\neq
+i}q_{ij}(u)V_{j}^{k}}{1-\beta q_{ii}(u)},\quad i=1,\ldots ,n.
+\end{equation*}
+
+\item Pre-Gauss-Seidel iteration: use already computed $V_{j}^{k+1}$'s
+\end{stepitemize}
+
+
+
+\end{frame}%
+
+
+
+\begin{frame}%
+
+\frametitle{Upwind Gauss-Seidel - idea}
+
+Gauss-Seidel method depends on the ordering of states.
+
+\begin{itemize}
+\item At the steady state, we have a static problem
+
+\begin{itemize}
+\item Can solve for $V_{i}$ and $u_{i}$ in a single iteration
+
+\item Backward Induction: solve states that transit \newline
+into the steady one,
+
+\item then states that transit into them, and so on
+
+\item This works best with deterministic state transitions
+\end{itemize}
+
+\item Stochastic transition -- \textbf{Upwind Gauss-Seidel}:
+
+\begin{itemize}
+\item Recall: $q_{i,j}(U_{i})$ = prob. of $j$ being the next period's state
+
+\item Record optimal policy $U_{i}^{k-1}$ from previous iteration
+
+\item Re-order the states so that $q_{i,i+1}(U_{i}^{k-1})\leq
+q_{i+1,i}(U_{i+1}^{k-1})$,
+
+\item Then update $V$ by visiting the states in this new order
+\end{itemize}
+\end{itemize}
+
+
+
+\end{frame}%
+
+
+
+\begin{frame}%
+
+\frametitle{Upwind Gauss-Seidel - tricks}
+
+\begin{itemize}
+\item "$q_{i,i+1}(U_{i}^{k-1})\leq q_{i+1,i}(U_{i+1}^{k-1})$" takes time to
+compute and sort
+
+\item \emph{Simulated} upwind G-S:
+
+\begin{itemize}
+\item Simulate the Markov process under $U^{k}$, \newline
+which approximates the limiting distribution
+
+\item Visit the states in the order of decreasing probability
+\end{itemize}
+
+\item \emph{Alternating sweep} G-S:
+
+\begin{itemize}
+\item Visit the states in increasing order if $k$ is odd, ...
+
+\item ... and decreasing order if $k$ is even.
+
+\item $\Rightarrow $ "Right" order on every second iteration.
+\end{itemize}
+\end{itemize}
+
+
+
+\end{frame}%
+
+\begin{frame}%
+
+\frametitle{Additional References}
+
+\begin{itemize}
+\item Dynamic programming in Economics
+\begin{itemize}
+\item Classics: Ljungqvist and Sargent \emph{Recursive Macroeconomic Theory}, Stokey, Lucas, and Prescott \emph{Recursive Methods in Economic Dynamics}
+\item Modern readable intro: Stachurski \emph{Economic Dynamics: Theory and Computation}
+\item Code: \href{https://julia.quantecon.org/}{\emph{Quantecon}}
+\end{itemize}
+
+\item Reinforcement Learning: CompSci perspective
+\begin{itemize}
+\item Classic: Sutton and Barto \emph{Reinforcement Learning: An Introduction}
+\item Code: Kochendorfer, Wheeler, Wray \href{https://algorithmsbook.com/}{\emph{Algorithms for Decision Making}}
+\item Notes: Hazan, \href{https://sites.google.com/view/cos59x-cct/home}{\emph{Computational Control Theory}}, Agarwal, Jiang, Kakade, Sun \href{https://rltheorybook.github.io/}{\emph{Reinforcement Learning: Theory and Algorithms}}, Silver \href{https://deepmind.com/learning-resources/-introduction-reinforcement-learning-david-silver}{\emph{Introduction to Reinforcement Learning}} 
+\end{itemize}
+
+
+\end{itemize}
+
+\end{frame}%
+
+
+\end{document}
