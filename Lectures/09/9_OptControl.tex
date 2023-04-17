@@ -94,7 +94,7 @@ as functions of time
 
 \begin{equation*}
 \begin{array}{rc}
-\max_{u} & \int_{0}^{T}e^{-\rho t}\pi (x,u,t)dt+W(x(T)) \\ 
+\max_{u} & \int_{0}^{T}e^{-\rho t}\pi (x,u,t)dt+g(x(T)) \\ 
 \text{subject to:} & \dot{x}=f(x,u,t),\quad x(0)=x_{0},%
 \end{array}%
 \end{equation*}%
@@ -350,7 +350,7 @@ The system of ODEs consists of:
 \partial x}$
 
 \item \textbf{TVC}: $\lim_{t\rightarrow \infty }e^{-\rho t}|\lambda
-(t)^{\prime }x(t)|<\infty $
+(t)^{T }x(t)|<\infty $
 
 \begin{itemize}
 \item Satisfied if variables converge to a \textbf{steady state}: \newline
@@ -389,7 +389,7 @@ k(0)=k_{0} \\
 \lim_{t\rightarrow \infty }e^{-\rho t}|\lambda (t)k(t)|<\infty
 \end{gather*}
 
-\item TVC is satisfied if for $t\geq T$, $\dot{k}(t)=0$ \& $\dot{c}(t)=0$
+\item TVC is satisfied if $\forall \epsilon>0$ $\exists T \text{ s.t. } \forall t\geq T$, $\left|\dot{k}(t)\right|,\left|\dot{c}(t)\right|<\epsilon$
 \end{stepitemize}
 
  
@@ -588,14 +588,14 @@ is the stable manifold of the old system.
 \item Generalized Hamiltonian
 \end{itemize}
 \begin{equation*}
-H(x,u,\lambda,z,t) = \pi(x,u,t)+f(x,u,t)\lambda+Tr(\sigma^{T}(x,u,t)z)
+H(x,u,\lambda,z,t) = \pi(x,u,t)+\lambda^{T}f(x,u,t)+Tr(\sigma^{T}(x,u,t)z)
 \end{equation*}
 \begin{enumerate}
 \item Optimality: $\hat{u}_t=\arg\max H(x_t,u,\lambda,z_t,t)$
 
 \item Law of motion: $dx_t=f(x_t,\hat{u}_t,t)dt+\sigma(x_t,\hat{u}_t,t)dW_t$.
  
-\item Costate equation: $d\lambda_{t}=-\nabla_{x}H(x_t,\hat{u}_t,\lambda_t,z_t,t)+z_{t}dW_t$
+\item Costate equation: $d\lambda_{t}=-\nabla_{x}H(x_t,\hat{u}_t,\lambda_t,z_t,t)dt+z_{t}dW_t$
 \item Initial condition: $x(0)=x_{0}$
 \item Transversality condition (TVC): $\lambda (T)=g^{\prime }(x(T))$
 
@@ -603,7 +603,7 @@ H(x,u,\lambda,z,t) = \pi(x,u,t)+f(x,u,t)\lambda+Tr(\sigma^{T}(x,u,t)z)
 
 \begin{itemize}
 \item Solve SDE system for $(x_t,u_t,\lambda_t,z_t)$: 1 extra costate
-\item where $\lambda_t=\nabla_{x}V(X_t,t)$, $z_t=\sigma(x_t,\hat{u}_t,t)^{T}\text{Hess}_{x}V(X_t,t)$
+\item where $\lambda_t=\nabla_{x}V(x_t,t)$, $z_t=\sigma(x_t,\hat{u}_t,t)^{T}\text{Hess}_{x}V(x_t,t)$
 \end{itemize}
 
 
