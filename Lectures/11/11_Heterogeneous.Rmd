@@ -103,7 +103,7 @@ $$m(x^{\prime}) =\int g(h_x^{-1}(x^\prime))\left|\det\frac{dh_x^{-1}(x^{\prime})
 
 - In continuous time case, $x$ follows diffusion equation
 $$dx=\mu(x,t)dt+\sigma(x,t)dW$$
-- Evolution of conditional expectation described by "infinitesimal generator" $A[\phi]=\frac{dE[\phi(x_{t+\Delta})|x_t]}{dt}$
+- Evolution of conditional expectation described by "infinitesimal generator" $A[\phi]=\frac{dE[\phi(x_{t+\Delta})|x_t]}{d\Delta}$
 - Apply It$\bar{o}$'s lemma to obtain $A[\phi]=\phi^{\prime}(x)\mu(x)+\frac{\sigma(x)^2}{2}\phi^{\prime\prime}(x)$
 - Evolution of distribution described by its ($L^2$) adjoint $A^{*}$
 - Density $m(x,t)$, it evolves as $\frac{\partial}{\partial t}m(x,t)=$
